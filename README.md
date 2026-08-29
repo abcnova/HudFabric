@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="versions/1.21.11/src/main/resources/assets/hudfabric/icon/icon.png" width="128" height="128" alt="HudFabric icon">
+</p>
+
 # HudFabric
 
 HudFabric is a client-side Fabric HUD mod by **ABC_Nova**. It provides a clean,
