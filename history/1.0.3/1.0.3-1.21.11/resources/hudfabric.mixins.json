@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "dev.abc_nova.hudfab.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "InGameHudMixin",
+    "InventoryEffectsMixin",
+    "WorldRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

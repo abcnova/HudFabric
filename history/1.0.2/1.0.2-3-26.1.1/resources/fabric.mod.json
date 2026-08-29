@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "hudfabric",
+  "version": "1.0.2-3",
+  "name": "HudFabric",
+  "description": "Client-side Fabric HUD editor with custom scoreboard, crosshair, FPS, ping, ESC menu access, keybind, and Mod Menu configuration.",
+  "authors": [
+    "ABC_Nova"
+  ],
+  "custom": {
+    "hudfabric:credits": "Built with Codex assistance."
+  },
+  "license": "MIT",
+  "icon": "assets/hudfabric/icon/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.abc_nova.hudfab.HudForgeClient"
+    ],
+    "modmenu": [
+      "dev.abc_nova.hudfab.integration.HudForgeModMenu"
+    ]
+  },
+  "mixins": [
+    "hudfabric.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "=26.1.1",
+    "java": ">=25",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "modmenu": ">=17.0.0"
+  }
+}

@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Implementation-Title: HudFabric
+Implementation-Version: 1.0.3-5
+Implementation-Vendor: ABC_Nova
+Fabric-Mapping-Namespace: official
+Fabric-Gradle-Version: 9.5.0
+Fabric-Loom-Version: 1.17.1
+Fabric-Mixin-Compile-Extensions-Version: 0.6.0
+Fabric-Minecraft-Version: 26.2
+Fabric-Tiny-Remapper-Version: 0.14.0
+Fabric-Loader-Version: 0.19.3
+Fabric-Mixin-Version: 0.17.3+mixin.0.8.7
+Fabric-Mixin-Group: net.fabricmc
+

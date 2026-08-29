@@ -172,7 +172,7 @@ public final class HudForgeRenderer {
     }
 
     private static void renderEquipmentHotbar(DrawContext context, TextRenderer textRenderer, HudForgeConfig config, List<ItemStack> stacks) {
-        int width = 2 + stacks.size() * 20;
+        int width = 22 + (stacks.size() - 1) * 20;
         int screenW = context.getScaledWindowWidth();
         int screenH = context.getScaledWindowHeight();
         int x = config.equipmentHotbarSide == 0 ? screenW / 2 - 91 - width - 6 : screenW / 2 + 91 + 6;
@@ -180,20 +180,21 @@ public final class HudForgeRenderer {
         context.getMatrices().pushMatrix();
         context.getMatrices().translate(x, y);
         context.getMatrices().scale(config.equipmentScale, config.equipmentScale);
-        fillSoftRect(context, 0, 0, width, 22, Math.min(4, config.equipmentRadius), config.equipmentBackground);
+        Identifier hotbar = Identifier.ofVanilla("hud/hotbar");
+        context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, hotbar, 182, 22, 0, 0, 0, 0, width - 3, 22);
+        context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, hotbar, 182, 22, 179, 0, width - 3, 0, 3, 22);
         for (int i = 0; i < stacks.size(); i++) {
             ItemStack stack = stacks.get(i);
-            int slotX = 2 + i * 20;
+            int slotX = i * 20;
             float fraction = (stack.getMaxDamage() - stack.getDamage()) / (float) Math.max(1, stack.getMaxDamage());
-            if (i > 0) context.fill(slotX - 1, 3, slotX, 19, 0x554E5870);
-            if (config.equipmentWarning && fraction * 100.0f <= config.equipmentWarningPercent) {
-                context.fill(slotX, 1, slotX + 18, 3, 0xFFFF5C5C);
-            }
-            context.drawItem(stack, slotX + 1, 3);
+            context.drawItem(stack, slotX + 3, 3);
             if (config.equipmentDurabilityDisplay != 0) {
                 int left = Math.max(0, stack.getMaxDamage() - stack.getDamage());
                 String value = config.equipmentDurabilityDisplay == 1 ? String.valueOf(left) : Math.round(fraction * 100.0f) + "%";
-                context.drawTextWithShadow(textRenderer, value, slotX + 9 - textRenderer.getWidth(value) / 2, -9, durabilityColor(fraction));
+                context.drawTextWithShadow(textRenderer, value, slotX + 11 - textRenderer.getWidth(value) / 2, -9, durabilityColor(fraction));
+            }
+            if (config.equipmentWarning && fraction * 100.0f <= config.equipmentWarningPercent) {
+                context.drawTextWithShadow(textRenderer, "!", slotX + 16, 1, 0xFFFF5555);
             }
         }
         context.getMatrices().popMatrix();
