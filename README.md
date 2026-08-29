@@ -4,6 +4,10 @@ HudFabric is a client-side Fabric HUD mod by **ABC_Nova**. It provides a clean,
 modular editor for the scoreboard, FPS/ping, coordinates and biome, potion
 effects, CPS, crosshair, block outline, and armor/tool durability.
 
+[Download on Modrinth](https://modrinth.com/mod/hudfabric) ·
+[Download on CurseForge](https://www.curseforge.com/minecraft/mc-mods/hudfabric) ·
+[Source and releases](https://github.com/abcnova/HudFabric)
+
 ## Highlights
 
 - Movable and scalable HUD modules
@@ -34,6 +38,8 @@ effects, CPS, crosshair, block outline, and armor/tool durability.
 - `versions/26.1.x` – Mojang-mapped 26.1.x source
 - `versions/26.2` – Mojang-mapped 26.2 source
 - `artifacts/1.0.4` – ready-to-use release JARs
+- `history` – privacy-safe archives, resources, and reconstructed Java source
+  for 1.0.0 through 1.0.3
 
 ## Building
 
