@@ -546,7 +546,7 @@ public final class HudForgeConfigScreen extends Screen {
         context.drawTextWithShadow(textRenderer, Text.literal("HF"), left + 21, top + 20, 0xFFFFFFFF);
         context.drawTextWithShadow(textRenderer, Text.literal("HudFabric"), left + 48, top + 20, WHITE);
         context.drawTextWithShadow(textRenderer, tr(page.titleKey), contentLeft + 10, top + 18, WHITE);
-        context.drawTextWithShadow(textRenderer, Text.literal("Modules & HUD Studio  •  1.0.4"), contentLeft + 10, top + 31, 0xFF8E9AB6);
+        context.drawTextWithShadow(textRenderer, Text.literal("Modules & HUD Studio  •  1.0.5"), contentLeft + 10, top + 31, 0xFF8E9AB6);
         if (page == SettingsPage.SCOREBOARD) {
             if (activeModule == null) {
                 context.drawTextWithShadow(textRenderer, tr("modules.hint"), contentLeft + 12, top + 57, 0xFF9DA8C3);

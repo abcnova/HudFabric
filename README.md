@@ -30,18 +30,18 @@ effects, CPS, crosshair, block outline, and armor/tool durability.
 
 | Minecraft | Artifact |
 | --- | --- |
-| 1.21.11 | `HudFabric-1.0.4-1.21.11.jar` |
-| 26.1 | `HudFabric-1.0.4-2-26.1.jar` |
-| 26.1.1 | `HudFabric-1.0.4-3-26.1.1.jar` |
-| 26.1.2 | `HudFabric-1.0.4-4-26.1.2.jar` |
-| 26.2 | `HudFabric-1.0.4-5-26.2.jar` |
+| 1.21.11 | `HudFabric-1.0.5-1.21.11.jar` |
+| 26.1 | `HudFabric-1.0.5-2-26.1.jar` |
+| 26.1.1 | `HudFabric-1.0.5-3-26.1.1.jar` |
+| 26.1.2 | `HudFabric-1.0.5-4-26.1.2.jar` |
+| 26.2 | `HudFabric-1.0.5-5-26.2.jar` |
 
 ## Source layout
 
 - `versions/1.21.11` – Yarn-based 1.21.11 source
 - `versions/26.1.x` – Mojang-mapped 26.1.x source
 - `versions/26.2` – Mojang-mapped 26.2 source
-- `artifacts/1.0.4` – ready-to-use release JARs
+- `artifacts/1.0.5` – ready-to-use release JARs
 - `history` – privacy-safe archives, resources, and reconstructed Java source
   for 1.0.0 through 1.0.3
 
