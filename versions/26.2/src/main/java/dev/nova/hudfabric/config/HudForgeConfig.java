@@ -24,11 +24,11 @@ public final class HudForgeConfig {
     public static final int CROSSHAIR_CIRCLE = 2;
     public static final int CROSSHAIR_DOT = 3;
 
-    public int configVersion = 11;
+    public int configVersion = 14;
     public int scoreboardMode = SCOREBOARD_CUSTOM;
     public boolean scoreboardEnabled = true;
     public float scoreboardScale = 1.0f;
-    public int scoreboardX = 10;
+    public int scoreboardX = 300;
     public int scoreboardY = 34;
     public int scoreboardWidth = 168;
     public int scoreboardRadius = 0;
@@ -50,7 +50,7 @@ public final class HudForgeConfig {
     public boolean coordsEnabled = true;
     public float coordsScale = 1.0f;
     public int coordsX = 8;
-    public int coordsY = 44;
+    public int coordsY = 48;
     public int coordsWidth = 116;
     public int coordsRadius = 0;
     public int coordsBackground = 0x98101218;
@@ -58,8 +58,8 @@ public final class HudForgeConfig {
 
     public boolean effectsEnabled = true;
     public float effectsScale = 1.18f;
-    public int effectsX = 8;
-    public int effectsY = 90;
+    public int effectsX = 140;
+    public int effectsY = 8;
     public int effectsWidth = 150;
     public int effectsRadius = 4;
     public int effectsBackground = 0x98101218;
@@ -77,8 +77,8 @@ public final class HudForgeConfig {
 
     public boolean equipmentEnabled = true;
     public float equipmentScale = 1.15f;
-    public int equipmentX = 8;
-    public int equipmentY = 164;
+    public int equipmentX = 140;
+    public int equipmentY = 100;
     public int equipmentWidth = 150;
     public int equipmentRadius = 4;
     public int equipmentBackground = 0x98101218;
@@ -88,6 +88,12 @@ public final class HudForgeConfig {
     public int equipmentDurabilityDisplay = 0;
     public boolean equipmentWarning = true;
     public int equipmentWarningPercent = 10;
+    public int equipmentHotbarX = -1;
+    public int equipmentHotbarY = -1;
+    public boolean equipmentHotbarBackground = true;
+    public boolean equipmentHotbarSeparate = false;
+    public int[] equipmentSlotX = {-1, -1, -1, -1};
+    public int[] equipmentSlotY = {-1, -1, -1, -1};
 
     public boolean customCrosshair = true;
     public boolean hideVanillaCrosshair = true;
@@ -100,6 +106,17 @@ public final class HudForgeConfig {
     public boolean crosshairOutline = true;
     public int crosshairOutlineThickness = 1;
     public int crosshairOutlineColor = 0xD0000000;
+    public boolean crosshairIndicator = true;
+    public boolean jumpResetEnabled = false;
+    public int jumpResetMode = 0;
+    public int jumpResetX = 210;
+    public int jumpResetY = 90;
+    public float jumpResetScale = 1.0f;
+    public int jumpResetWidth = 128;
+    public int jumpResetRadius = 6;
+    public int jumpResetBackground = 0xC0101218;
+    public int jumpResetText = 0xFFEAF0FF;
+    public int jumpResetDisplayTicks = 50;
 
     public boolean hideVanillaScoreboard = true;
     public boolean autoRespawn = false;
@@ -186,6 +203,11 @@ public final class HudForgeConfig {
         equipmentHotbarSide = clamp(equipmentHotbarSide, 0, 1);
         equipmentDurabilityDisplay = clamp(equipmentDurabilityDisplay, 0, 2);
         equipmentWarningPercent = clamp(equipmentWarningPercent, 1, 50);
+        equipmentHotbarX = clamp(equipmentHotbarX, -1, 10000);
+        equipmentHotbarY = clamp(equipmentHotbarY, -1, 10000);
+        if (equipmentSlotX == null || equipmentSlotX.length != 4) equipmentSlotX = new int[]{-1, -1, -1, -1};
+        if (equipmentSlotY == null || equipmentSlotY.length != 4) equipmentSlotY = new int[]{-1, -1, -1, -1};
+        for (int i = 0; i < 4; i++) { equipmentSlotX[i] = clamp(equipmentSlotX[i], -1, 10000); equipmentSlotY[i] = clamp(equipmentSlotY[i], -1, 10000); }
         if (equipmentBackground == 0 && equipmentText == 0) {
             equipmentBackground = 0x98101218;
             equipmentText = 0xFFEAF0FF;
@@ -195,6 +217,9 @@ public final class HudForgeConfig {
         crosshairGap = clamp(crosshairGap, 0, 16);
         crosshairThickness = clamp(crosshairThickness, 1, 8);
         crosshairOutlineThickness = clamp(crosshairOutlineThickness, 1, 4);
+        jumpResetMode = clamp(jumpResetMode, 0, 1); jumpResetX = clamp(jumpResetX, 0, 10000); jumpResetY = clamp(jumpResetY, 0, 10000);
+        jumpResetWidth = clamp(jumpResetWidth, 92, 260); jumpResetRadius = clamp(jumpResetRadius, 0, 12);
+        jumpResetScale = clamp(jumpResetScale, 0.5f, 2.5f); jumpResetDisplayTicks = clamp(jumpResetDisplayTicks, 20, 100);
         if (serverProfiles == null) {
             serverProfiles = new LinkedHashMap<>();
         }
@@ -338,6 +363,35 @@ public final class HudForgeConfig {
             equipmentWarningPercent = 10;
             configVersion = 11;
             save();
+        }
+        if (configVersion < 12) {
+            equipmentHotbarX = -1;
+            equipmentHotbarY = -1;
+            equipmentHotbarBackground = true;
+            crosshairIndicator = true;
+            configVersion = 12;
+            save();
+        }
+        if (configVersion < 13) {
+            equipmentHotbarSeparate = false;
+            equipmentSlotX = new int[]{-1, -1, -1, -1};
+            equipmentSlotY = new int[]{-1, -1, -1, -1};
+            configVersion = 13;
+            save();
+        }
+        if (configVersion < 14) {
+            jumpResetEnabled = false; jumpResetX = 210; jumpResetY = 90; jumpResetScale = 1.0f;
+            jumpResetBackground = 0xC0101218; jumpResetText = 0xFFEAF0FF; jumpResetDisplayTicks = 50;
+            configVersion = 14; save();
+        }
+        if (configVersion < 15) {
+            jumpResetMode = 0; jumpResetWidth = 128; jumpResetRadius = 6; jumpResetDisplayTicks = 30;
+            configVersion = 15; save();
+        }
+        if (configVersion < 16) {
+            equipmentHotbarX = -1; equipmentHotbarY = -1;
+            equipmentSlotX = new int[]{-1, -1, -1, -1}; equipmentSlotY = new int[]{-1, -1, -1, -1};
+            configVersion = 16; save();
         }
     }
 

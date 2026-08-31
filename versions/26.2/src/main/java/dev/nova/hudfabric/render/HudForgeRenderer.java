@@ -1,6 +1,7 @@
 package dev.nova.hudfabric.render;
 
 import dev.nova.hudfabric.HudForgeClient;
+import dev.nova.hudfabric.JumpResetTiming;
 import dev.nova.hudfabric.config.HudForgeConfig;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -17,6 +18,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
@@ -48,6 +50,7 @@ public final class HudForgeRenderer {
             renderEquipment(context, client, config);
         }
         if (config.cpsEnabled) renderCps(context, client.font, config);
+        if (HudForgeClient.jumpResetVisible()) renderJumpReset(context, client.font, config);
 
         if (config.scoreboardMode == HudForgeConfig.SCOREBOARD_CUSTOM) {
             renderScoreboard(context, client, config);
@@ -91,6 +94,15 @@ public final class HudForgeRenderer {
         fillSoftRect(context, 0, 0, width, 22, config.cpsRadius, config.cpsBackground);
         context.text(font, value, (width - font.width(value)) / 2, 7, config.cpsText);
         context.pose().popMatrix();
+    }
+    private static void renderJumpReset(GuiGraphicsExtractor context, Font font, HudForgeConfig config) {
+        int d = HudForgeClient.jumpResetDelta();
+        JumpResetTiming.Result result = JumpResetTiming.classify(d); String key = "hudfabric.jump_reset." + result.name().toLowerCase(java.util.Locale.ROOT);
+        Component line = result == JumpResetTiming.Result.PERFECT || result == JumpResetTiming.Result.MISSED ? Component.translatable(key) : Component.translatable(key, Math.abs(d));
+        int w = Math.max(config.jumpResetWidth, font.width(line) + 20); int x = config.jumpResetMode == 0 ? (context.guiWidth() - font.width(line)) / 2 : config.jumpResetX; int y = config.jumpResetMode == 0 ? context.guiHeight() / 2 - 38 : config.jumpResetY;
+        context.pose().pushMatrix(); context.pose().translate(x, y); context.pose().scale(config.jumpResetScale, config.jumpResetScale);
+        int color = result == JumpResetTiming.Result.PERFECT ? 0xFF65E58A : result == JumpResetTiming.Result.EARLY || result == JumpResetTiming.Result.LATE ? 0xFFFFC857 : 0xFFFF647C;
+        if (config.jumpResetMode == 1) { fillSoftRect(context, 0, 0, w, 24, config.jumpResetRadius, config.jumpResetBackground); context.text(font, line, (w - font.width(line)) / 2, 8, config.jumpResetText); } else context.text(font, line, 0, 0, color); context.pose().popMatrix();
     }
 
     private static void renderCoords(GuiGraphicsExtractor context, Minecraft client, HudForgeConfig config) {
@@ -137,11 +149,9 @@ public final class HudForgeRenderer {
         }
         if (config.equipmentMode == 1) {
             List<ItemStack> armor = new ArrayList<>();
-            addDurability(armor, client.player.getItemBySlot(EquipmentSlot.HEAD));
-            addDurability(armor, client.player.getItemBySlot(EquipmentSlot.CHEST));
-            addDurability(armor, client.player.getItemBySlot(EquipmentSlot.LEGS));
-            addDurability(armor, client.player.getItemBySlot(EquipmentSlot.FEET));
-            if (!armor.isEmpty()) renderEquipmentHotbar(context, client.font, config, armor);
+            armor.add(client.player.getItemBySlot(EquipmentSlot.HEAD)); armor.add(client.player.getItemBySlot(EquipmentSlot.CHEST));
+            armor.add(client.player.getItemBySlot(EquipmentSlot.LEGS)); armor.add(client.player.getItemBySlot(EquipmentSlot.FEET));
+            if (armor.stream().anyMatch(s -> !s.isEmpty() && s.isDamageableItem())) renderEquipmentHotbar(context, client.font, config, armor);
             return;
         }
         List<ItemStack> lines = new ArrayList<>();
@@ -165,25 +175,40 @@ public final class HudForgeRenderer {
 
     private static void renderEquipmentHotbar(GuiGraphicsExtractor context, Font font, HudForgeConfig config, List<ItemStack> stacks) {
         int width = 22 + (stacks.size() - 1) * 20;
-        int x = config.equipmentHotbarSide == 0 ? context.guiWidth() / 2 - 91 - width - 6 : context.guiWidth() / 2 + 91 + 6;
-        int y = context.guiHeight() - 22;
-        context.pose().pushMatrix(); context.pose().translate(x, y); context.pose().scale(config.equipmentScale, config.equipmentScale);
-        Identifier hotbar = Identifier.withDefaultNamespace("hud/hotbar");
-        context.blitSprite(RenderPipelines.GUI_TEXTURED, hotbar, 182, 22, 0, 0, 0, 0, width - 3, 22, 0xFFFFFFFF);
-        context.blitSprite(RenderPipelines.GUI_TEXTURED, hotbar, 182, 22, 179, 0, width - 3, 0, 3, 22, 0xFFFFFFFF);
+        boolean offhandOnLeft = Minecraft.getInstance().player == null || Minecraft.getInstance().player.getMainArm() == net.minecraft.world.entity.HumanoidArm.RIGHT;
+        int defaultX = context.guiWidth() / 2 - 91 - width - 6 - (offhandOnLeft ? 29 : 0);
+        int x = config.equipmentHotbarX < 0 ? defaultX : Math.min(config.equipmentHotbarX, Math.max(0, context.guiWidth() - width));
+        int y = config.equipmentHotbarY < 0 ? context.guiHeight() - 22 : Math.min(config.equipmentHotbarY, Math.max(0, context.guiHeight() - 22));
+        context.pose().pushMatrix(); if (!config.equipmentHotbarSeparate) context.pose().translate(x, y);
+        if (config.equipmentHotbarBackground && !config.equipmentHotbarSeparate) {
+            Identifier hotbar = Identifier.withDefaultNamespace("hud/hotbar");
+            context.blitSprite(RenderPipelines.GUI_TEXTURED, hotbar, 182, 22, 0, 0, 0, 0, width - 3, 22, 0xFFFFFFFF);
+            context.blitSprite(RenderPipelines.GUI_TEXTURED, hotbar, 182, 22, 179, 0, width - 3, 0, 3, 22, 0xFFFFFFFF);
+        }
         for (int i = 0; i < stacks.size(); i++) {
-            ItemStack stack = stacks.get(i); int slotX = i * 20;
+            ItemStack stack = stacks.get(i);
+            int slotX = config.equipmentHotbarSeparate ? (config.equipmentSlotX[i] < 0 ? x + i * 20 : config.equipmentSlotX[i]) : i * 20;
+            int slotY = config.equipmentHotbarSeparate ? (config.equipmentSlotY[i] < 0 ? y : config.equipmentSlotY[i]) : 0;
+            if (config.equipmentHotbarBackground && config.equipmentHotbarSeparate) drawIndependentVanillaSlot(context, slotX, slotY);
+            if (stack.isEmpty() || !stack.isDamageableItem()) continue;
             float fraction = (stack.getMaxDamage() - stack.getDamageValue()) / (float) Math.max(1, stack.getMaxDamage());
-            context.item(stack, slotX + 3, 3);
+            context.item(stack, slotX + 3, slotY + 3);
+            int barWidth = Math.max(0, Math.min(13, Math.round(13.0f * fraction)));
+            if (stack.getDamageValue() > 0) {
+                context.fill(slotX + 5, slotY + 18, slotX + 18, slotY + 20, 0xFF000000);
+                context.fill(slotX + 5, slotY + 18, slotX + 5 + barWidth, slotY + 19, durabilityColor(fraction));
+            }
             if (config.equipmentDurabilityDisplay != 0) {
                 int left = Math.max(0, stack.getMaxDamage() - stack.getDamageValue());
                 String value = config.equipmentDurabilityDisplay == 1 ? String.valueOf(left) : Math.round(fraction * 100.0f) + "%";
-                context.text(font, value, slotX + 11 - font.width(value) / 2, -9, durabilityColor(fraction));
+                context.text(font, value, slotX + 11 - font.width(value) / 2, slotY - 9, durabilityColor(fraction));
             }
-            if (config.equipmentWarning && fraction * 100.0f <= config.equipmentWarningPercent) context.text(font, "!", slotX + 16, 1, 0xFFFF5555);
+            if (config.equipmentWarning && fraction * 100.0f <= config.equipmentWarningPercent) context.text(font, "!", slotX + 16, slotY + 1, 0xFFFF5555);
         }
         context.pose().popMatrix();
     }
+
+    private static void drawIndependentVanillaSlot(GuiGraphicsExtractor context, int x, int y) { context.fill(x, y, x + 22, y + 22, 0xFF080808); context.fill(x + 1, y + 1, x + 21, y + 21, 0xFFB0B0B0); context.fill(x + 2, y + 2, x + 20, y + 20, 0xFF5A5A5A); context.fill(x + 3, y + 3, x + 19, y + 19, 0xCC151515); }
 
     private static void renderEffectsPanel(GuiGraphicsExtractor context, Font textRenderer, HudForgeConfig config, List<EffectLine> lines) {
         int width = config.effectsWidth;
@@ -341,20 +366,19 @@ public final class HudForgeRenderer {
         }
         if (config.crosshairMode == HudForgeConfig.CROSSHAIR_CIRCLE) {
             int r = Math.max(3, size + gap);
-            for (int i = -r; i <= r; i++) {
-                int span = Math.round((float) Math.sqrt(Math.max(0, r * r - i * i)));
-                if (Math.abs(i) >= r - thickness || span >= r - thickness) {
-                    context.fill(centerX + i, centerY - span, centerX + i + 1, centerY - span + thickness, color);
-                    context.fill(centerX + i, centerY + span - thickness + 1, centerX + i + 1, centerY + span + 1, color);
-                }
+            int inner = Math.max(0, r - thickness);
+            for (int x = -r; x <= r; x++) for (int y = -r; y <= r; y++) {
+                int distance = x * x + y * y;
+                if (distance <= r * r && distance >= inner * inner) context.fill(centerX + x, centerY + y, centerX + x + 1, centerY + y + 1, color);
             }
             return;
         }
 
-        drawCenteredRect(context, centerX - gap - size / 2, centerY, size, thickness, color);
-        drawCenteredRect(context, centerX + gap + size / 2, centerY, size, thickness, color);
-        drawCenteredRect(context, centerX, centerY - gap - size / 2, thickness, size, color);
-        drawCenteredRect(context, centerX, centerY + gap + size / 2, thickness, size, color);
+        int half = thickness / 2;
+        context.fill(centerX - gap - size, centerY - half, centerX - gap, centerY - half + thickness, color);
+        context.fill(centerX + gap + 1, centerY - half, centerX + gap + size + 1, centerY - half + thickness, color);
+        context.fill(centerX - half, centerY - gap - size, centerX - half + thickness, centerY - gap, color);
+        context.fill(centerX - half, centerY + gap + 1, centerX - half + thickness, centerY + gap + size + 1, color);
         if (config.crosshairDot) {
             drawCenteredRect(context, centerX, centerY, thickness, thickness, color);
         }

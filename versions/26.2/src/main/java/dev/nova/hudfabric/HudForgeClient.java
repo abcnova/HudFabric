@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -25,6 +26,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import org.lwjgl.glfw.GLFW;
 import java.util.ArrayDeque;
 
@@ -39,10 +42,12 @@ public final class HudForgeClient implements ClientModInitializer {
     private static Object lastPlayer;
     private static final ArrayDeque<Long> LEFT_CLICKS = new ArrayDeque<>();
     private static final ArrayDeque<Long> RIGHT_CLICKS = new ArrayDeque<>();
-    private static boolean leftDown, rightDown;
     private static ServerData lastServer;
     private static Button reconnectButton;
     private static int reconnectTicks;
+    private static long jumpResetHitNanos, jumpResetLastJumpNanos;
+    private static int jumpResetLastHurtTime, jumpResetDelta = Integer.MIN_VALUE, jumpResetVisibleTicks;
+    private static long jumpResetLastPlayerAttackNanos;
 
     @Override
     public void onInitializeClient() {
@@ -55,7 +60,8 @@ public final class HudForgeClient implements ClientModInitializer {
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            updateCps(client);
+            updateCps();
+            updateJumpReset(client);
             updateReconnect(client);
             if (client.getCurrentServer() != null) lastServer = client.getCurrentServer();
             clearEffectsAfterWorldChange(client);
@@ -75,6 +81,7 @@ public final class HudForgeClient implements ClientModInitializer {
         });
 
         HudElementRegistry.addLast(Identifier.fromNamespaceAndPath(MOD_ID, "main"), HudForgeRenderer::render);
+        AttackEntityCallback.EVENT.register((player, level, hand, entity, hitResult) -> { if (level.isClientSide() && entity instanceof Player) jumpResetLastPlayerAttackNanos = System.nanoTime(); return InteractionResult.PASS; });
 
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
             if (screen instanceof PauseScreen) {
@@ -109,21 +116,35 @@ public final class HudForgeClient implements ClientModInitializer {
         if (lastServer != null) ConnectScreen.startConnecting(new JoinMultiplayerScreen(new TitleScreen()), client, ServerAddress.parseString(lastServer.ip), lastServer, false, null);
     }
 
-    private static void updateCps(Minecraft client) {
+    private static void updateCps() {
         long now = System.currentTimeMillis();
-        long window = client.getWindow().handle();
-        boolean left = GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
-        boolean right = GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_RIGHT) == GLFW.GLFW_PRESS;
-        if (client.gui.screen() == null) {
-            if (left && !leftDown) LEFT_CLICKS.addLast(now);
-            if (right && !rightDown) RIGHT_CLICKS.addLast(now);
-        }
-        leftDown = left; rightDown = right;
         trimClicks(LEFT_CLICKS, now); trimClicks(RIGHT_CLICKS, now);
+    }
+    public static void recordMouseClick(int button) {
+        Minecraft client = Minecraft.getInstance();
+        if (client.gui.screen() != null) return;
+        long now = System.currentTimeMillis();
+        if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) LEFT_CLICKS.addLast(now);
+        else if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) RIGHT_CLICKS.addLast(now);
     }
     private static void trimClicks(ArrayDeque<Long> clicks, long now) { while (!clicks.isEmpty() && now - clicks.peekFirst() > 1000L) clicks.removeFirst(); }
     public static int leftCps() { return LEFT_CLICKS.size(); }
     public static int rightCps() { return RIGHT_CLICKS.size(); }
+    private static void updateJumpReset(Minecraft client) {
+        if (client.player == null) { jumpResetLastHurtTime = 0; jumpResetHitNanos = 0; jumpResetVisibleTicks = 0; return; }
+        long now = System.nanoTime();
+        boolean down = client.options.keyJump.isDown();
+        if (down && client.player.onGround() && now - jumpResetLastJumpNanos > 80_000_000L) onLocalJump();
+        int hurt = client.player.hurtTime;
+        if (hurt > jumpResetLastHurtTime && client.player.getDeltaMovement().horizontalDistanceSqr() > 0.0016D && now - jumpResetLastPlayerAttackNanos <= 5_000_000_000L) jumpResetHitNanos = now;
+        jumpResetLastHurtTime = hurt;
+        if (jumpResetHitNanos > 0 && now - jumpResetHitNanos > 250_000_000L) jumpResetHitNanos = 0;
+        if (jumpResetVisibleTicks > 0) jumpResetVisibleTicks--;
+    }
+    public static void onLocalJump() { long now = System.nanoTime(); if (now - jumpResetLastJumpNanos < 40_000_000L) return; jumpResetLastJumpNanos = now; if (jumpResetHitNanos > 0) { long ms = (now - jumpResetHitNanos) / 1_000_000L; if (ms >= 0 && ms <= 250) { showJumpResetMs((int)ms); jumpResetHitNanos = 0; } } }
+    private static void showJumpResetMs(int d) { jumpResetDelta = d; jumpResetVisibleTicks = config == null ? 30 : config.jumpResetDisplayTicks; }
+    public static int jumpResetDelta() { return jumpResetDelta; }
+    public static boolean jumpResetVisible() { return config != null && config.jumpResetEnabled && jumpResetVisibleTicks > 0; }
 
     private static void clearEffectsAfterWorldChange(Minecraft client) {
         if (client.level != lastLevel || client.player != lastPlayer) {

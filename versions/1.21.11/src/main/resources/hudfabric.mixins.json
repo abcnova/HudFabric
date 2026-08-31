@@ -5,6 +5,7 @@
   "client": [
     "InGameHudMixin",
     "InventoryEffectsMixin",
+    "MouseMixin",
     "WorldRendererMixin"
   ],
   "injectors": {

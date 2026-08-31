@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(LevelRenderer.class)
 public abstract class WorldRendererMixin {
-    @ModifyVariable(method = "renderHitOutline", at = @At("HEAD"), argsOnly = true, ordinal = 0)
+    @ModifyVariable(method = "submitHitOutline", at = @At("HEAD"), argsOnly = true, ordinal = 0)
     private int hudfabric$customBlockOutlineColor(int color) {
         if (HudForgeClient.config != null && HudForgeClient.config.customBlockOutline) {
             return HudForgeClient.config.blockOutlineColor;

@@ -40,6 +40,7 @@ public final class HudForgeConfigScreen extends Screen {
     private DragTarget dragTarget = DragTarget.NONE;
     private int dragOffsetX;
     private int dragOffsetY;
+    private int draggedEquipmentSlot = -1;
     private int settingsScroll;
     private int settingsMaxScroll;
     private boolean scrollbarDragging;
@@ -177,6 +178,8 @@ public final class HudForgeConfigScreen extends Screen {
                     button.setMessage(crosshairButtonText(config.crosshairMode));
                 }));
                 y += 24;
+                addToggle(controlX, y, controlW, "toggle.crosshair_indicator", config.crosshairIndicator, value -> config.crosshairIndicator = value);
+                y += 24;
                 addToggle(controlX, y, controlW, "toggle.center_dot", config.crosshairDot, value -> config.crosshairDot = value);
                 y += 24;
                 addSlider(controlX, y, controlW, "slider.size", config.crosshairSize, 1, 24, value -> config.crosshairSize = Math.round(value));
@@ -298,7 +301,24 @@ public final class HudForgeConfigScreen extends Screen {
                 dragOffsetY = (int) click.y() - config.effectsY;
                 return true;
             }
-            if (config.equipmentEnabled && inside(click.x(), click.y(), config.equipmentX, config.equipmentY, equipmentWidth(config), equipmentHeight(config))) {
+            if (config.equipmentEnabled && config.equipmentMode == 1 && config.equipmentHotbarSeparate) {
+                for (int i = 0; i < 4; i++) {
+                    int sx = equipmentSlotX(config, i), sy = equipmentSlotY(config, i);
+                    if (inside(click.x(), click.y(), sx, sy, 22, 22)) {
+                        config.equipmentSlotX[i] = sx; config.equipmentSlotY[i] = sy; draggedEquipmentSlot = i;
+                        dragTarget = DragTarget.EQUIPMENT_HOTBAR_SLOT_MOVE; dragOffsetX = (int) click.x() - sx; dragOffsetY = (int) click.y() - sy; return true;
+                    }
+                }
+            }
+            if (config.equipmentEnabled && config.equipmentMode == 1 && !config.equipmentHotbarSeparate && inside(click.x(), click.y(), hotbarX(config), hotbarY(config), 82, 22)) {
+                if (config.equipmentHotbarX < 0) config.equipmentHotbarX = hotbarX(config);
+                if (config.equipmentHotbarY < 0) config.equipmentHotbarY = hotbarY(config);
+                dragTarget = DragTarget.EQUIPMENT_HOTBAR_MOVE;
+                dragOffsetX = (int) click.x() - config.equipmentHotbarX;
+                dragOffsetY = (int) click.y() - config.equipmentHotbarY;
+                return true;
+            }
+            if (config.equipmentEnabled && config.equipmentMode == 0 && inside(click.x(), click.y(), config.equipmentX, config.equipmentY, equipmentWidth(config), equipmentHeight(config))) {
                 dragTarget = inside(click.x(), click.y(), config.equipmentX + equipmentWidth(config) - 10, config.equipmentY + equipmentHeight(config) - 10, 10, 10) ? DragTarget.EQUIPMENT_RESIZE : DragTarget.EQUIPMENT_MOVE;
                 dragOffsetX = (int) click.x() - config.equipmentX;
                 dragOffsetY = (int) click.y() - config.equipmentY;
@@ -307,6 +327,7 @@ public final class HudForgeConfigScreen extends Screen {
             if (config.cpsEnabled && inside(click.x(), click.y(), config.cpsX, config.cpsY, Math.round(config.cpsWidth * config.cpsScale), Math.round(22 * config.cpsScale))) {
                 dragTarget = inside(click.x(), click.y(), config.cpsX + Math.round(config.cpsWidth * config.cpsScale) - 10, config.cpsY + Math.round(22 * config.cpsScale) - 10, 10, 10) ? DragTarget.CPS_RESIZE : DragTarget.CPS_MOVE; dragOffsetX = (int) click.x() - config.cpsX; dragOffsetY = (int) click.y() - config.cpsY; return true;
             }
+            if (config.jumpResetEnabled && config.jumpResetMode == 1 && inside(click.x(), click.y(), config.jumpResetX, config.jumpResetY, Math.round(config.jumpResetWidth * config.jumpResetScale), Math.round(24 * config.jumpResetScale))) { dragTarget = inside(click.x(), click.y(), config.jumpResetX + Math.round(config.jumpResetWidth * config.jumpResetScale) - 10, config.jumpResetY + Math.round(24 * config.jumpResetScale) - 10, 10, 10) ? DragTarget.JUMP_RESET_RESIZE : DragTarget.JUMP_RESET_MOVE; dragOffsetX = (int) click.x() - config.jumpResetX; dragOffsetY = (int) click.y() - config.jumpResetY; return true; }
         }
         return super.mouseClicked(click, doubleClick);
     }
@@ -351,6 +372,18 @@ public final class HudForgeConfigScreen extends Screen {
                 config.equipmentY = clamp((int) click.y() - dragOffsetY, 0, Math.max(0, height - equipmentHeight(config)));
                 return true;
             }
+            case EQUIPMENT_HOTBAR_MOVE -> {
+                config.equipmentHotbarX = clamp((int) click.x() - dragOffsetX, 0, Math.max(0, width - 82));
+                config.equipmentHotbarY = clamp((int) click.y() - dragOffsetY, 0, Math.max(0, height - 22));
+                return true;
+            }
+            case EQUIPMENT_HOTBAR_SLOT_MOVE -> {
+                if (draggedEquipmentSlot >= 0 && draggedEquipmentSlot < 4) {
+                    config.equipmentSlotX[draggedEquipmentSlot] = clamp((int) click.x() - dragOffsetX, 0, Math.max(0, width - 22));
+                    config.equipmentSlotY[draggedEquipmentSlot] = clamp((int) click.y() - dragOffsetY, 0, Math.max(0, height - 22));
+                }
+                return true;
+            }
             case CPS_MOVE -> {
                 config.cpsX = clamp((int) click.x() - dragOffsetX, 0, Math.max(0, width - Math.round(config.cpsWidth * config.cpsScale)));
                 config.cpsY = clamp((int) click.y() - dragOffsetY, 0, Math.max(0, height - Math.round(22 * config.cpsScale))); return true;
@@ -359,6 +392,8 @@ public final class HudForgeConfigScreen extends Screen {
                 config.cpsWidth = clamp(Math.round(((float) click.x() - config.cpsX) / Math.max(0.5f, config.cpsScale)), 72, 240);
                 config.cpsScale = clamp(((float) click.y() - config.cpsY) / 22.0f, 0.5f, 2.5f); return true;
             }
+            case JUMP_RESET_MOVE -> { config.jumpResetX = clamp((int) click.x() - dragOffsetX, 0, Math.max(0, width - Math.round(config.jumpResetWidth * config.jumpResetScale))); config.jumpResetY = clamp((int) click.y() - dragOffsetY, 0, Math.max(0, height - Math.round(24 * config.jumpResetScale))); return true; }
+            case JUMP_RESET_RESIZE -> { config.jumpResetWidth = clamp(Math.round(((float) click.x() - config.jumpResetX) / Math.max(0.5f, config.jumpResetScale)), 92, 260); config.jumpResetScale = clamp(((float) click.y() - config.jumpResetY) / 24.0f, 0.5f, 2.5f); return true; }
             case SCOREBOARD_RESIZE -> {
                 int rawWidth = Math.round(((float) click.x() - config.scoreboardX) / Math.max(0.5f, config.scoreboardScale));
                 config.scoreboardWidth = clamp(rawWidth, 90, 320);
@@ -396,6 +431,7 @@ public final class HudForgeConfigScreen extends Screen {
     public boolean mouseReleased(MouseButtonEvent click) {
         scrollbarDragging = false;
         dragTarget = DragTarget.NONE;
+        draggedEquipmentSlot = -1;
         HudForgeClient.saveActiveServerProfile();
         return super.mouseReleased(click);
     }
@@ -431,10 +467,14 @@ public final class HudForgeConfigScreen extends Screen {
             renderHandle(context, config.effectsX + effectsWidth(config), config.effectsY + effectsHeight(config));
         }
         if (config.equipmentEnabled) {
-            renderSimplePreview(context, config.equipmentX, config.equipmentY, config.equipmentScale, config.equipmentWidth, 96, config.equipmentRadius, config.equipmentBackground, config.equipmentText, List.of("Tool 1532/1561", "Helmet 363/363", "Chest 528/528", "Legs 495/495"));
-            renderHandle(context, config.equipmentX + equipmentWidth(config), config.equipmentY + equipmentHeight(config));
+            if (config.equipmentMode == 1) renderEquipmentHotbarPreview(context, config);
+            else {
+                renderSimplePreview(context, config.equipmentX, config.equipmentY, config.equipmentScale, config.equipmentWidth, 96, config.equipmentRadius, config.equipmentBackground, config.equipmentText, List.of("Tool 1532/1561", "Helmet 363/363", "Chest 528/528", "Legs 495/495"));
+                renderHandle(context, config.equipmentX + equipmentWidth(config), config.equipmentY + equipmentHeight(config));
+            }
         }
         if (config.cpsEnabled) { renderCpsPreview(context, config); renderHandle(context, config.cpsX + Math.round(config.cpsWidth * config.cpsScale), config.cpsY + Math.round(22 * config.cpsScale)); }
+        if (config.jumpResetEnabled && config.jumpResetMode == 1) { renderSimplePreview(context, config.jumpResetX, config.jumpResetY, config.jumpResetScale, config.jumpResetWidth, 24, config.jumpResetRadius, config.jumpResetBackground, config.jumpResetText, List.of(tr("jump_reset.perfect").getString())); renderHandle(context, config.jumpResetX + Math.round(config.jumpResetWidth * config.jumpResetScale), config.jumpResetY + Math.round(24 * config.jumpResetScale)); }
     }
 
     private void renderScoreboardPreview(GuiGraphicsExtractor context, HudForgeConfig config) {
@@ -486,6 +526,34 @@ public final class HudForgeConfigScreen extends Screen {
         String preview = "L 8   •   R 4";
         context.text(font, preview, (config.cpsWidth - font.width(preview)) / 2, 7, config.cpsText); context.pose().popMatrix();
     }
+
+    private void renderEquipmentHotbarPreview(GuiGraphicsExtractor context, HudForgeConfig config) {
+        int x = hotbarX(config), y = hotbarY(config);
+        if (config.equipmentHotbarBackground && !config.equipmentHotbarSeparate) fillSoftRect(context, x, y, 82, 22, 4, 0xB0101218);
+        for (int i = 0; i < 4; i++) {
+            int baseX = config.equipmentHotbarSeparate ? equipmentSlotX(config, i) : x + i * 20;
+            int baseY = config.equipmentHotbarSeparate ? equipmentSlotY(config, i) : y;
+            if (config.equipmentHotbarBackground && config.equipmentHotbarSeparate) drawIndependentSlot(context, baseX, baseY);
+            int slotX = baseX + 4;
+            context.fill(slotX, baseY + 3, slotX + 16, baseY + 17, 0x332A3142);
+            int bar = 13 - i * 2;
+            if (i > 0) { context.fill(slotX + 1, baseY + 18, slotX + 14, baseY + 20, 0xFF000000); context.fill(slotX + 1, baseY + 18, slotX + 1 + bar, baseY + 19, i < 3 ? 0xFF65D94F : 0xFFFFAA33); }
+        }
+    }
+
+    private static void drawIndependentSlot(GuiGraphicsExtractor context, int x, int y) { context.fill(x, y, x + 22, y + 22, 0xFF080808); context.fill(x + 1, y + 1, x + 21, y + 21, 0xFFB0B0B0); context.fill(x + 2, y + 2, x + 20, y + 20, 0xFF5A5A5A); context.fill(x + 3, y + 3, x + 19, y + 19, 0xCC151515); }
+
+    private int hotbarX(HudForgeConfig config) {
+        if (config.equipmentHotbarX >= 0) return clamp(config.equipmentHotbarX, 0, Math.max(0, width - 82));
+        boolean offhandOnLeft = Minecraft.getInstance().player == null || Minecraft.getInstance().player.getMainArm() == net.minecraft.world.entity.HumanoidArm.RIGHT;
+        return Math.max(0, width / 2 - 91 - 88 - (offhandOnLeft ? 29 : 0));
+    }
+
+    private int hotbarY(HudForgeConfig config) {
+        return config.equipmentHotbarY < 0 ? Math.max(0, height - 22) : clamp(config.equipmentHotbarY, 0, Math.max(0, height - 22));
+    }
+    private int equipmentSlotX(HudForgeConfig c, int i) { return c.equipmentSlotX[i] < 0 ? hotbarX(c) + i * 20 : clamp(c.equipmentSlotX[i], 0, Math.max(0, width - 22)); }
+    private int equipmentSlotY(HudForgeConfig c, int i) { return c.equipmentSlotY[i] < 0 ? hotbarY(c) : clamp(c.equipmentSlotY[i], 0, Math.max(0, height - 22)); }
 
     private void renderSimplePreview(GuiGraphicsExtractor context, int x, int y, float scale, int panelW, int panelH, int radius, int background, int textColor, List<String> lines) {
         context.pose().pushMatrix();
@@ -819,7 +887,7 @@ public final class HudForgeConfigScreen extends Screen {
             int gap = 10, cardW = (width - 40) / 3, i = 0;
             for (HudModule module : HudModule.values()) {
                 int x = left + 10 + (i % 3) * (cardW + gap), cardY = y + 8 + (i / 3) * 48;
-                addRenderableWidget(new HudButton(x, cardY, cardW, 38, tr(module.labelKey), b -> { activeModule = module; colorTarget = module.colors[0]; settingsScroll = 0; rebuildWidgets(); }));
+                addRenderableWidget(new HudButton(x, cardY, cardW, 38, tr(module.labelKey), b -> { activeModule = module; if (module.colors.length > 0) colorTarget = module.colors[0]; settingsScroll = 0; rebuildWidgets(); }));
                 i++;
             }
             return;
@@ -853,12 +921,16 @@ public final class HudForgeConfigScreen extends Screen {
             }
             case EQUIPMENT -> {
                 addToggle(x, cy, w, "toggle.equipment", c.equipmentEnabled, v -> c.equipmentEnabled = v);
-                addRenderableWidget(new HudButton(x, cy += 24, w, 20, equipmentModeText(c.equipmentMode), b -> { c.equipmentMode = (c.equipmentMode + 1) % 2; b.setMessage(equipmentModeText(c.equipmentMode)); }));
-                addRenderableWidget(new HudButton(x, cy += 24, w, 20, equipmentSideText(c.equipmentHotbarSide), b -> { c.equipmentHotbarSide = (c.equipmentHotbarSide + 1) % 2; b.setMessage(equipmentSideText(c.equipmentHotbarSide)); }));
-                addRenderableWidget(new HudButton(x, cy += 24, w, 20, equipmentDisplayText(c.equipmentDurabilityDisplay), b -> { c.equipmentDurabilityDisplay = (c.equipmentDurabilityDisplay + 1) % 3; b.setMessage(equipmentDisplayText(c.equipmentDurabilityDisplay)); }));
-                addSlider(x, cy += 24, w, "slider.equipment_scale", c.equipmentScale, .5f, 2.5f, v -> c.equipmentScale = v);
-                addSlider(x, cy += 24, w, "slider.equipment_width", c.equipmentWidth, 120, 320, v -> c.equipmentWidth = Math.round(v));
-                addSlider(x, cy += 24, w, "slider.equipment_radius", c.equipmentRadius, 0, 12, v -> c.equipmentRadius = Math.round(v));
+                addRenderableWidget(new HudButton(x, cy += 24, w, 20, equipmentModeText(c.equipmentMode), b -> { c.equipmentMode = (c.equipmentMode + 1) % 2; rebuildWidgets(); }));
+                if (c.equipmentMode == 1) {
+                    addToggle(x, cy += 24, w, "toggle.equipment_hotbar_background", c.equipmentHotbarBackground, v -> c.equipmentHotbarBackground = v);
+                    addToggle(x, cy += 24, w, "toggle.equipment_hotbar_separate", c.equipmentHotbarSeparate, v -> { c.equipmentHotbarSeparate = v; if (!v) { c.equipmentSlotX = new int[]{-1,-1,-1,-1}; c.equipmentSlotY = new int[]{-1,-1,-1,-1}; } });
+                    addRenderableWidget(new HudButton(x, cy += 24, w, 20, equipmentDisplayText(c.equipmentDurabilityDisplay), b -> { c.equipmentDurabilityDisplay = (c.equipmentDurabilityDisplay + 1) % 3; b.setMessage(equipmentDisplayText(c.equipmentDurabilityDisplay)); }));
+                } else {
+                    addSlider(x, cy += 24, w, "slider.equipment_scale", c.equipmentScale, .5f, 2.5f, v -> c.equipmentScale = v);
+                    addSlider(x, cy += 24, w, "slider.equipment_width", c.equipmentWidth, 120, 320, v -> c.equipmentWidth = Math.round(v));
+                    addSlider(x, cy += 24, w, "slider.equipment_radius", c.equipmentRadius, 0, 12, v -> c.equipmentRadius = Math.round(v));
+                }
                 addToggle(x, cy += 24, w, "toggle.equipment_warning", c.equipmentWarning, v -> c.equipmentWarning = v);
                 addSlider(x, cy += 24, w, "slider.equipment_warning", c.equipmentWarningPercent, 1, 50, v -> c.equipmentWarningPercent = Math.round(v));
             }
@@ -867,6 +939,12 @@ public final class HudForgeConfigScreen extends Screen {
                 addSlider(x, cy += 24, w, "slider.cps_scale", c.cpsScale, .5f, 2.5f, v -> c.cpsScale = v);
                 addSlider(x, cy += 24, w, "slider.cps_width", c.cpsWidth, 72, 240, v -> c.cpsWidth = Math.round(v));
                 addSlider(x, cy += 24, w, "slider.cps_radius", c.cpsRadius, 0, 12, v -> c.cpsRadius = Math.round(v));
+            }
+            case JUMP_RESET -> {
+                addToggle(x, cy, w, "toggle.jump_reset", c.jumpResetEnabled, v -> c.jumpResetEnabled = v);
+                addRenderableWidget(new HudButton(x, cy += 24, w, 20, tr(c.jumpResetMode == 0 ? "jump_reset.mode.target" : "jump_reset.mode.panel"), b -> { c.jumpResetMode = (c.jumpResetMode + 1) % 2; rebuildWidgets(); }));
+                addSlider(x, cy += 24, w, "slider.scale", c.jumpResetScale, 0.5f, 2.5f, v -> c.jumpResetScale = v);
+                if (c.jumpResetMode == 1) { addSlider(x, cy += 24, w, "slider.width", c.jumpResetWidth, 92, 260, v -> c.jumpResetWidth = Math.round(v)); addSlider(x, cy += 24, w, "slider.board_radius", c.jumpResetRadius, 0, 12, v -> c.jumpResetRadius = Math.round(v)); }
             }
             case BLOCK_OUTLINE -> addToggle(x, cy, w, "toggle.block_outline", c.customBlockOutline, v -> c.customBlockOutline = v);
         }
@@ -1037,6 +1115,7 @@ public final class HudForgeConfigScreen extends Screen {
         EFFECTS("module.effects", ColorTarget.EFFECTS_BG, ColorTarget.EFFECTS_TEXT),
         EQUIPMENT("module.equipment", ColorTarget.EQUIPMENT_BG, ColorTarget.EQUIPMENT_TEXT),
         CPS("module.cps", ColorTarget.CPS_BG, ColorTarget.CPS_TEXT),
+        JUMP_RESET("module.jump_reset", ColorTarget.JUMP_RESET_BG, ColorTarget.JUMP_RESET_TEXT),
         BLOCK_OUTLINE("module.block_outline", ColorTarget.BLOCK_OUTLINE);
         private final String labelKey;
         private final ColorTarget[] colors;
@@ -1055,8 +1134,12 @@ public final class HudForgeConfigScreen extends Screen {
         EFFECTS_RESIZE,
         EQUIPMENT_MOVE,
         EQUIPMENT_RESIZE,
+        EQUIPMENT_HOTBAR_MOVE,
+        EQUIPMENT_HOTBAR_SLOT_MOVE,
         CPS_MOVE,
-        CPS_RESIZE
+        CPS_RESIZE,
+        JUMP_RESET_MOVE,
+        JUMP_RESET_RESIZE
     }
 
     private enum ColorTarget {
@@ -1106,6 +1189,8 @@ public final class HudForgeConfigScreen extends Screen {
         },
         CPS_BG("color.cps_background", "CPB") { int get(HudForgeConfig c) { return c.cpsBackground; } void set(HudForgeConfig c, int v) { c.cpsBackground = v; } },
         CPS_TEXT("color.cps_text", "CPT") { int get(HudForgeConfig c) { return c.cpsText; } void set(HudForgeConfig c, int v) { c.cpsText = v; } },
+        JUMP_RESET_BG("color.jump_reset_background", "JRB") { int get(HudForgeConfig c) { return c.jumpResetBackground; } void set(HudForgeConfig c, int v) { c.jumpResetBackground = v; } },
+        JUMP_RESET_TEXT("color.jump_reset_text", "JRT") { int get(HudForgeConfig c) { return c.jumpResetText; } void set(HudForgeConfig c, int v) { c.jumpResetText = v; } },
         CROSSHAIR("color.crosshair", "CH") {
             int get(HudForgeConfig c) { return c.crosshairColor; }
             void set(HudForgeConfig c, int v) { c.crosshairColor = v; }

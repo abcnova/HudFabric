@@ -7,6 +7,9 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.scoreboard.ScoreboardObjective;
 import net.minecraft.client.render.RenderTickCounter;
+import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -27,6 +30,20 @@ public abstract class InGameHudMixin {
                 && HudForgeClient.config.crosshairMode != HudForgeConfig.CROSSHAIR_VANILLA
                 && MinecraftClient.getInstance().options.getPerspective().isFirstPerson()) {
             ci.cancel();
+        }
+    }
+
+    @Inject(method = "renderCrosshair", at = @At("TAIL"))
+    private void hudforge$renderCrosshairIndicator(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (HudForgeClient.config != null
+                && HudForgeClient.config.crosshairMode == HudForgeConfig.CROSSHAIR_VANILLA
+                && HudForgeClient.config.crosshairIndicator
+                && client.currentScreen == null
+                && client.options.getPerspective().isFirstPerson()
+                && client.targetedEntity instanceof PlayerEntity) {
+            context.drawGuiTexture(RenderPipelines.CROSSHAIR, Identifier.of("hudfabric", "crosshair_indicator"),
+                    (context.getScaledWindowWidth() - 15) / 2, (context.getScaledWindowHeight() - 15) / 2, 15, 15);
         }
     }
 
