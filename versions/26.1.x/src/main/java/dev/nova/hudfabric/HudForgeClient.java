@@ -48,6 +48,8 @@ public final class HudForgeClient implements ClientModInitializer {
     private static long jumpResetHitNanos, jumpResetLastJumpNanos;
     private static int jumpResetLastHurtTime, jumpResetDelta = Integer.MIN_VALUE, jumpResetVisibleTicks;
     private static long jumpResetLastPlayerAttackNanos;
+    private static Player jumpResetCombatTarget;
+    private static boolean jumpResetWindowOpen;
 
     @Override
     public void onInitializeClient() {
@@ -81,7 +83,7 @@ public final class HudForgeClient implements ClientModInitializer {
         });
 
         HudElementRegistry.addLast(Identifier.fromNamespaceAndPath(MOD_ID, "main"), HudForgeRenderer::render);
-        AttackEntityCallback.EVENT.register((player, level, hand, entity, hitResult) -> { if (level.isClientSide() && entity instanceof Player) jumpResetLastPlayerAttackNanos = System.nanoTime(); return InteractionResult.PASS; });
+        AttackEntityCallback.EVENT.register((player, level, hand, entity, hitResult) -> { if (level.isClientSide() && entity instanceof Player target) { jumpResetLastPlayerAttackNanos = System.nanoTime(); jumpResetCombatTarget = target; } return InteractionResult.PASS; });
 
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
             if (screen instanceof PauseScreen) {
@@ -131,17 +133,25 @@ public final class HudForgeClient implements ClientModInitializer {
     public static int leftCps() { return LEFT_CLICKS.size(); }
     public static int rightCps() { return RIGHT_CLICKS.size(); }
     private static void updateJumpReset(Minecraft client) {
-        if (client.player == null) { jumpResetLastHurtTime = 0; jumpResetHitNanos = 0; jumpResetVisibleTicks = 0; return; }
+        if (client.player == null) { jumpResetLastHurtTime = 0; jumpResetHitNanos = 0; jumpResetWindowOpen = false; jumpResetVisibleTicks = 0; jumpResetCombatTarget = null; return; }
         long now = System.nanoTime();
-        boolean down = client.options.keyJump.isDown();
-        if (down && client.player.onGround() && now - jumpResetLastJumpNanos > 80_000_000L) onLocalJump();
+        if (now - jumpResetLastPlayerAttackNanos > 2_500_000_000L) jumpResetCombatTarget = null;
         int hurt = client.player.hurtTime;
-        if (hurt > jumpResetLastHurtTime && client.player.getDeltaMovement().horizontalDistanceSqr() > 0.0016D && now - jumpResetLastPlayerAttackNanos <= 5_000_000_000L) jumpResetHitNanos = now;
+        if (config != null && config.jumpResetEnabled && hurt > jumpResetLastHurtTime
+                && client.player.getDeltaMovement().horizontalDistanceSqr() > 0.004225D
+                && jumpResetCombatTarget != null && jumpResetCombatTarget.isAlive()
+                && client.player.distanceToSqr(jumpResetCombatTarget) <= 100.0D
+                && now - jumpResetLastPlayerAttackNanos <= 2_500_000_000L) {
+            jumpResetHitNanos = now;
+            jumpResetWindowOpen = true;
+            long earlyMs = Math.floorDiv(jumpResetLastJumpNanos - now, 1_000_000L);
+            if (earlyMs >= -200L && earlyMs < 0L) { showJumpResetMs((int) earlyMs); jumpResetWindowOpen = false; }
+        }
         jumpResetLastHurtTime = hurt;
-        if (jumpResetHitNanos > 0 && now - jumpResetHitNanos > 250_000_000L) jumpResetHitNanos = 0;
+        if (jumpResetWindowOpen && now - jumpResetHitNanos > 200_000_000L) { showJumpResetMs(201); jumpResetWindowOpen = false; jumpResetHitNanos = 0; }
         if (jumpResetVisibleTicks > 0) jumpResetVisibleTicks--;
     }
-    public static void onLocalJump() { long now = System.nanoTime(); if (now - jumpResetLastJumpNanos < 40_000_000L) return; jumpResetLastJumpNanos = now; if (jumpResetHitNanos > 0) { long ms = (now - jumpResetHitNanos) / 1_000_000L; if (ms >= 0 && ms <= 250) { showJumpResetMs((int)ms); jumpResetHitNanos = 0; } } }
+    public static void onLocalJump() { long now = System.nanoTime(); if (now - jumpResetLastJumpNanos < 40_000_000L) return; jumpResetLastJumpNanos = now; if (jumpResetWindowOpen && jumpResetHitNanos > 0) { long ms = (now - jumpResetHitNanos) / 1_000_000L; if (ms >= 0 && ms <= 200) { showJumpResetMs((int)ms); jumpResetWindowOpen = false; jumpResetHitNanos = 0; } } }
     private static void showJumpResetMs(int d) { jumpResetDelta = d; jumpResetVisibleTicks = config == null ? 30 : config.jumpResetDisplayTicks; }
     public static int jumpResetDelta() { return jumpResetDelta; }
     public static boolean jumpResetVisible() { return config != null && config.jumpResetEnabled && jumpResetVisibleTicks > 0; }

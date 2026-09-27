@@ -19,6 +19,7 @@ effects, CPS, crosshair, block outline, and armor/tool durability.
 - Custom scoreboard with server formatting support
 - Potion effect timers and optional vanilla-effect suppression
 - CPS display and custom crosshair
+- Jump Reset Indicator with combat-only timing feedback
 - Armor/tool durability panel
 - Optional hotbar-style armor widget with left/right placement
 - Bar, numeric, or percentage durability display
@@ -30,18 +31,20 @@ effects, CPS, crosshair, block outline, and armor/tool durability.
 
 | Minecraft | Artifact |
 | --- | --- |
-| 1.21.11 | `HudFabric-1.0.5-1.21.11.jar` |
-| 26.1 | `HudFabric-1.0.5-2-26.1.jar` |
-| 26.1.1 | `HudFabric-1.0.5-3-26.1.1.jar` |
-| 26.1.2 | `HudFabric-1.0.5-4-26.1.2.jar` |
-| 26.2 | `HudFabric-1.0.5-5-26.2.jar` |
+| 1.21.11 | `HudFabric-1.0.6-1.21.11.jar` |
+| 26.1 | `HudFabric-1.0.6-2-26.1.jar` |
+| 26.1.1 | `HudFabric-1.0.6-3-26.1.1.jar` |
+| 26.1.2 | `HudFabric-1.0.6-4-26.1.2.jar` |
+| 26.2 | `HudFabric-1.0.6-5-26.2.jar` |
+| 26.3 | `HudFabric-1.0.6-6-26.3.jar` |
 
 ## Source layout
 
 - `versions/1.21.11` – Yarn-based 1.21.11 source
 - `versions/26.1.x` – Mojang-mapped 26.1.x source
 - `versions/26.2` – Mojang-mapped 26.2 source
-- `artifacts/1.0.5` – ready-to-use release JARs
+- `versions/26.3` – Mojang-mapped 26.3 source
+- `artifacts/1.0.6` – ready-to-use release JARs
 - `history` – privacy-safe archives, resources, and reconstructed Java source
   for 1.0.0 through 1.0.3
 

@@ -50,6 +50,8 @@ public final class HudForgeClient implements ClientModInitializer {
     private static int jumpResetDelta = Integer.MIN_VALUE;
     private static int jumpResetVisibleTicks;
     private static long jumpResetLastPlayerAttackNanos;
+    private static PlayerEntity jumpResetCombatTarget;
+    private static boolean jumpResetWindowOpen;
 
     @Override
     public void onInitializeClient() {
@@ -89,7 +91,10 @@ public final class HudForgeClient implements ClientModInitializer {
 
         HudRenderCallback.EVENT.register(HudForgeRenderer::render);
         AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
-            if (world.isClient() && entity instanceof PlayerEntity) jumpResetLastPlayerAttackNanos = System.nanoTime();
+            if (world.isClient() && entity instanceof PlayerEntity target) {
+                jumpResetLastPlayerAttackNanos = System.nanoTime();
+                jumpResetCombatTarget = target;
+            }
             return ActionResult.PASS;
         });
 
@@ -158,26 +163,45 @@ public final class HudForgeClient implements ClientModInitializer {
     public static int rightCps() { return RIGHT_CLICKS.size(); }
 
     private static void updateJumpReset(MinecraftClient client) {
-        if (client.player == null) { jumpResetLastHurtTime = 0; jumpResetHitNanos = 0; jumpResetVisibleTicks = 0; return; }
+        if (client.player == null) { jumpResetLastHurtTime = 0; jumpResetHitNanos = 0; jumpResetWindowOpen = false; jumpResetVisibleTicks = 0; jumpResetCombatTarget = null; return; }
         long now = System.nanoTime();
-        boolean jumpDown = client.options.jumpKey.isPressed();
-        if (jumpDown && client.player.isOnGround() && now - jumpResetLastJumpNanos > 80_000_000L) onLocalJump();
+        if (now - jumpResetLastPlayerAttackNanos > 2_500_000_000L) jumpResetCombatTarget = null;
         int hurt = client.player.hurtTime;
         double horizontalKnockback = client.player.getVelocity().horizontalLengthSquared();
-        if (hurt > jumpResetLastHurtTime && horizontalKnockback > 0.0016D && now - jumpResetLastPlayerAttackNanos <= 5_000_000_000L) {
+        if (config != null && config.jumpResetEnabled
+                && hurt > jumpResetLastHurtTime
+                && horizontalKnockback > 0.004225D
+                && jumpResetCombatTarget != null
+                && jumpResetCombatTarget.isAlive()
+                && client.player.squaredDistanceTo(jumpResetCombatTarget) <= 100.0D
+                && now - jumpResetLastPlayerAttackNanos <= 2_500_000_000L) {
             jumpResetHitNanos = now;
+            jumpResetWindowOpen = true;
+            long earlyMs = Math.floorDiv(jumpResetLastJumpNanos - now, 1_000_000L);
+            if (earlyMs >= -200L && earlyMs < 0L) {
+                showJumpResetMs((int) earlyMs);
+                jumpResetWindowOpen = false;
+            }
         }
         jumpResetLastHurtTime = hurt;
-        if (jumpResetHitNanos > 0 && now - jumpResetHitNanos > 250_000_000L) jumpResetHitNanos = 0;
+        if (jumpResetWindowOpen && now - jumpResetHitNanos > 200_000_000L) {
+            showJumpResetMs(201);
+            jumpResetWindowOpen = false;
+            jumpResetHitNanos = 0;
+        }
         if (jumpResetVisibleTicks > 0) jumpResetVisibleTicks--;
     }
     public static void onLocalJump() {
         long now = System.nanoTime();
         if (now - jumpResetLastJumpNanos < 40_000_000L) return;
         jumpResetLastJumpNanos = now;
-        if (jumpResetHitNanos > 0) {
+        if (jumpResetWindowOpen && jumpResetHitNanos > 0) {
             long elapsedMs = (now - jumpResetHitNanos) / 1_000_000L;
-            if (elapsedMs >= 0 && elapsedMs <= 250) { showJumpResetMs((int) elapsedMs); jumpResetHitNanos = 0; }
+            if (elapsedMs >= 0 && elapsedMs <= 200) {
+                showJumpResetMs((int) elapsedMs);
+                jumpResetWindowOpen = false;
+                jumpResetHitNanos = 0;
+            }
         }
     }
     private static void showJumpResetMs(int milliseconds) { jumpResetDelta = milliseconds; jumpResetVisibleTicks = config == null ? 30 : config.jumpResetDisplayTicks; }

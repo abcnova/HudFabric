@@ -5,6 +5,7 @@
   "client": [
     "InGameHudMixin",
     "InventoryEffectsMixin",
+    "LivingEntityMixin",
     "MouseMixin",
     "WorldRendererMixin"
   ],

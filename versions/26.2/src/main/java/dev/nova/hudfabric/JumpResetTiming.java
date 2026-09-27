@@ -5,8 +5,8 @@ public final class JumpResetTiming {
     public enum Result { PERFECT, EARLY, LATE, MISSED }
     public static Result classify(int milliseconds) {
         if (milliseconds < 0) return Result.EARLY;
-        if (milliseconds <= 25) return Result.PERFECT;
-        if (milliseconds <= 250) return Result.LATE;
+        if (milliseconds <= 80) return Result.PERFECT;
+        if (milliseconds <= 200) return Result.LATE;
         return Result.MISSED;
     }
 }
