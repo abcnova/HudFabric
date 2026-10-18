@@ -1,0 +1,1 @@
+A clean client-side Fabric HUD editor with movable modules, precise styling, per-module resets, and support for Minecraft 1.21.11 through 26.3.

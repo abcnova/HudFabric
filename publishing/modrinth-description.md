@@ -18,15 +18,15 @@ and style useful HUD modules directly in-game—no server installation required.
 - Jump Reset Indicator for PvP timing practice
 - Configurable crosshair, Crosshair Indicator, and block outline
 
-## Highlights in 1.0.6
+## Highlights in 1.0.7
 
-- Added a dedicated Minecraft 26.3 build
-- Replaced jump-key polling with real local jump-event detection
-- Restricted Jump Reset Indicator feedback to active player combat
-- Added early, perfect, late, and missed timing feedback
-- Prevented ordinary movement and unrelated damage from triggering feedback
-- Updated dependencies and rebuilt every supported version
-- Preserved and automatically migrated existing HudFabric settings
+- Fixed module dragging on Minecraft 26.3 and verified it in a client game test
+- Restored the familiar editor layout with responsive handling for smaller windows
+- Added reset controls for individual modules, crosshair settings, extras, or everything
+- Kept moved HUD elements inside the visible canvas when the window size changes
+- Cleaned unsupported server glyphs from custom scoreboard titles
+- Clarified the Jump Reset Indicator Background and Text color controls
+- Preserved existing settings unless a reset button is used
 
 ## Compatibility
 
