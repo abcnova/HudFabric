@@ -657,7 +657,7 @@ public final class HudForgeConfigScreen extends Screen {
                 if (!compactLayout()) fillSoftRect(context, contentLeft + half, top + 52, half - 6, panelH - 96, 7, 0x801A2438);
                 context.text(font, tr(activeModule.labelKey), contentLeft + 16, top + 57, 0xFF8A9BFF);
                 if (!compactLayout()) {
-                    context.text(font, tr("modules.appearance"), contentLeft + half + 10, top + 57, 0xFF8A9BFF);
+                    context.text(font, activeModule == HudModule.JUMP_RESET ? tr(activeModule.labelKey) : tr("modules.appearance"), contentLeft + half + 10, top + 57, 0xFF8A9BFF);
                     int pickerX = colorPickerX(left, panelW);
                     renderColorPicker(context, pickerX, top + 174, contentW / 2 - 34, colorTarget.get(HudForgeClient.config));
                     int swatchY = top + 90;
