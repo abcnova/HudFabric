@@ -10,11 +10,14 @@ effects, CPS, crosshair, block outline, and armor/tool durability.
 
 [Download on Modrinth](https://modrinth.com/mod/hudfabric) ·
 [Download on CurseForge](https://www.curseforge.com/minecraft/mc-mods/hudfabric) ·
-[Source and releases](https://github.com/abcnova/HudFabric)
+[Releases](https://github.com/abcnova/HudFabric/releases) ·
+[Report an issue](https://github.com/abcnova/HudFabric/issues)
 
 ## Highlights
 
 - Movable and scalable HUD modules
+- Reset controls for individual modules, the crosshair, extra settings, and the full configuration
+- Compact color editing for narrower GUI sizes
 - Per-module colors, width, scale, and corner radius
 - Custom scoreboard with server formatting support
 - Potion effect timers and optional vanilla-effect suppression
@@ -31,12 +34,12 @@ effects, CPS, crosshair, block outline, and armor/tool durability.
 
 | Minecraft | Artifact |
 | --- | --- |
-| 1.21.11 | `HudFabric-1.0.6-1.21.11.jar` |
-| 26.1 | `HudFabric-1.0.6-2-26.1.jar` |
-| 26.1.1 | `HudFabric-1.0.6-3-26.1.1.jar` |
-| 26.1.2 | `HudFabric-1.0.6-4-26.1.2.jar` |
-| 26.2 | `HudFabric-1.0.6-5-26.2.jar` |
-| 26.3 | `HudFabric-1.0.6-6-26.3.jar` |
+| 1.21.11 | `HudFabric-1.0.7-1.21.11.jar` |
+| 26.1 | `HudFabric-1.0.7-2-26.1.jar` |
+| 26.1.1 | `HudFabric-1.0.7-3-26.1.1.jar` |
+| 26.1.2 | `HudFabric-1.0.7-4-26.1.2.jar` |
+| 26.2 | `HudFabric-1.0.7-5-26.2.jar` |
+| 26.3 | `HudFabric-1.0.7-6-26.3.jar` |
 
 ## Source layout
 
@@ -44,7 +47,7 @@ effects, CPS, crosshair, block outline, and armor/tool durability.
 - `versions/26.1.x` – Mojang-mapped 26.1.x source
 - `versions/26.2` – Mojang-mapped 26.2 source
 - `versions/26.3` – Mojang-mapped 26.3 source
-- `artifacts/1.0.6` – ready-to-use release JARs
+- `artifacts/1.0.7` – locally built release candidates
 - `history` – privacy-safe archives, resources, and reconstructed Java source
   for 1.0.0 through 1.0.3
 

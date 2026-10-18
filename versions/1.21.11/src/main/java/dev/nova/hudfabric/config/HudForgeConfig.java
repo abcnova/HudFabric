@@ -11,6 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 public final class HudForgeConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -126,6 +128,39 @@ public final class HudForgeConfig {
     public boolean customBlockOutline = false;
     public int blockOutlineColor = 0xFF64A8FF;
     public Map<String, ServerProfile> serverProfiles = new LinkedHashMap<>();
+
+    /** Restore exactly the defaults of a fresh installation for one module or all settings. */
+    public void reset(String scope) {
+        HudForgeConfig defaults = new HudForgeConfig();
+        for (Field field : HudForgeConfig.class.getFields()) {
+            if (Modifier.isStatic(field.getModifiers())) continue;
+            String name = field.getName();
+            if (name.equals("configVersion") || name.equals("serverProfiles")) continue;
+            boolean matches = switch (scope) {
+                case "ALL" -> true;
+                case "SCOREBOARD" -> name.startsWith("scoreboard") || name.equals("hideVanillaScoreboard");
+                case "STATS" -> name.startsWith("stats");
+                case "COORDS" -> name.startsWith("coords");
+                case "EFFECTS" -> name.startsWith("effects") || name.equals("hideVanillaEffects");
+                case "EQUIPMENT" -> name.startsWith("equipment");
+                case "CPS" -> name.startsWith("cps");
+                case "JUMP_RESET" -> name.startsWith("jumpReset");
+                case "BLOCK_OUTLINE" -> name.equals("customBlockOutline") || name.equals("blockOutlineColor");
+                case "CROSSHAIR" -> name.startsWith("crosshair") || name.equals("customCrosshair") || name.equals("hideVanillaCrosshair");
+                case "EXTRAS" -> name.startsWith("autoRespawn") || name.startsWith("autoReconnect");
+                default -> false;
+            };
+            if (!matches) continue;
+            try {
+                Object value = field.get(defaults);
+                field.set(this, value instanceof int[] array ? array.clone() : value);
+            } catch (IllegalAccessException e) {
+                throw new IllegalStateException("Cannot reset HudFabric setting: " + name, e);
+            }
+        }
+        if (scope.equals("ALL")) serverProfiles.clear();
+        clamped();
+    }
 
     public static HudForgeConfig load() {
         if (Files.exists(PATH)) {
@@ -600,8 +635,7 @@ public final class HudForgeConfig {
             config.crosshairOutline = crosshairOutline;
             config.crosshairOutlineThickness = crosshairOutlineThickness;
             config.crosshairOutlineColor = crosshairOutlineColor;
-            // Block outline is a global visual preference and must not silently
-            // change when joining a server with an older profile.
+            // Global preference; do not overwrite it with stale server data.
         }
     }
 }

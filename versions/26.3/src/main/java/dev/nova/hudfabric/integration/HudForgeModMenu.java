@@ -7,6 +7,6 @@ import dev.nova.hudfabric.gui.HudForgeConfigScreen;
 public final class HudForgeModMenu implements ModMenuApi {
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return parent -> new HudForgeConfigScreen(parent, true);
+        return parent -> new HudForgeConfigScreen(parent);
     }
 }

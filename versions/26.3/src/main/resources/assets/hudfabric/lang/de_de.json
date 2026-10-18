@@ -10,6 +10,8 @@
   "hudfabric.button.done": "Fertig",
   "hudfabric.button.back": "Zurueck",
   "hudfabric.button.back_editor": "Zum Editor",
+  "hudfabric.button.reset_all": "Alle Einstellungen zurücksetzen",
+  "hudfabric.button.reset_module": "Moduleinstellungen zurücksetzen",
   "hudfabric.button.modules_back": "Alle Module",
   "hudfabric.modules.hint": "Waehle ein Modul und passe nur dieses Modul an",
   "hudfabric.modules.appearance": "DESIGN & FARBEN",

@@ -22,6 +22,17 @@ dependencies {
     compileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
 }
 
+fabricApi {
+    configureTests {
+        createSourceSet = true
+        modId = "hudfabric-test"
+        enableGameTests = false
+        enableClientGameTests = true
+        clearRunDirectory = false
+        eula = true
+    }
+}
+
 processResources {
     inputs.property "version", project.version
     inputs.property "minecraft_version", project.minecraft_version

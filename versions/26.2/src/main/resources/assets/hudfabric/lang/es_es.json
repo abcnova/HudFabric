@@ -10,6 +10,8 @@
   "hudfabric.button.done": "Listo",
   "hudfabric.button.back": "Atras",
   "hudfabric.button.back_editor": "Volver al editor",
+  "hudfabric.button.reset_all": "Restablecer todos los ajustes",
+  "hudfabric.button.reset_module": "Restablecer ajustes del módulo",
   "hudfabric.button.modules_back": "Todos los modulos",
   "hudfabric.modules.hint": "Elige un modulo para configurarlo",
   "hudfabric.modules.appearance": "APARIENCIA",

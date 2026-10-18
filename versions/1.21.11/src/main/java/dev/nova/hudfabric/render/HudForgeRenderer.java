@@ -337,7 +337,8 @@ public final class HudForgeRenderer {
             return;
         }
 
-        int width = Math.max(config.scoreboardWidth, textRenderer.getWidth(objective.getDisplayName()) + 20);
+        Text title = cleanScoreboardTitle(objective.getDisplayName());
+        int width = Math.max(config.scoreboardWidth, textRenderer.getWidth(title) + 20);
         int titleHeight = 18;
         int rowHeight = 11;
         int rows = Math.min(30, entries.size());
@@ -353,7 +354,6 @@ public final class HudForgeRenderer {
         context.getMatrices().scale(config.scoreboardScale, config.scoreboardScale);
         fillSoftRect(context, 0, 0, width, height, config.scoreboardRadius, config.scoreboardBackground);
 
-        Text title = objective.getDisplayName();
         int titleX = MathHelper.clamp((width - textRenderer.getWidth(title)) / 2, 8, width - 8);
         context.drawTextWithShadow(textRenderer, title, titleX, 5, config.scoreboardTitle);
 
@@ -370,6 +370,29 @@ public final class HudForgeRenderer {
         }
 
         context.getMatrices().popMatrix();
+    }
+
+    private static Text cleanScoreboardTitle(Text original) {
+        String originalText = original.getString();
+        String cleaned = originalText.codePoints()
+                .filter(cp -> Character.getType(cp) != Character.PRIVATE_USE && cp != 0xFFFD)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append).toString()
+                .replaceFirst("\\s+[\\p{So}\\p{Sm}\\p{Sk}]+\\s*$", "").stripTrailing();
+        if (cleaned.equals(originalText)) return original;
+        net.minecraft.text.MutableText result = Text.empty();
+        int[] written = {0};
+        original.visit((style, segment) -> {
+            String filtered = segment.codePoints()
+                    .filter(cp -> Character.getType(cp) != Character.PRIVATE_USE && cp != 0xFFFD)
+                    .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append).toString();
+            int count = Math.min(filtered.length(), cleaned.length() - written[0]);
+            if (count > 0) {
+                result.append(Text.literal(filtered.substring(0, count)).setStyle(style));
+                written[0] += count;
+            }
+            return java.util.Optional.<Void>empty();
+        }, net.minecraft.text.Style.EMPTY);
+        return result;
     }
 
     private static void renderCrosshair(DrawContext context, HudForgeConfig config, int width, int height) {

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "hudfabric-test",
+  "version": "1.0.0",
+  "name": "HudFabric Client Tests",
+  "environment": "client",
+  "entrypoints": {
+    "fabric-client-gametest": ["dev.nova.hudfabric.test.HudEditorClientTest"]
+  }
+}

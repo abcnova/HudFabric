@@ -38,8 +38,6 @@ public final class HudForgeClient implements ClientModInitializer {
     private static KeyMapping openConfigKey;
     private static String activeServerKey = "";
     private static int deathScreenTicks = 0;
-    private static Object lastLevel;
-    private static Object lastPlayer;
     private static final ArrayDeque<Long> LEFT_CLICKS = new ArrayDeque<>();
     private static final ArrayDeque<Long> RIGHT_CLICKS = new ArrayDeque<>();
     private static ServerData lastServer;
@@ -66,7 +64,6 @@ public final class HudForgeClient implements ClientModInitializer {
             updateJumpReset(client);
             updateReconnect(client);
             if (client.getCurrentServer() != null) lastServer = client.getCurrentServer();
-            clearEffectsAfterWorldChange(client);
             updateServerProfile(client);
             while (openConfigKey.consumeClick()) {
                 openConfigScreen(client.gui.screen());
@@ -155,16 +152,6 @@ public final class HudForgeClient implements ClientModInitializer {
     private static void showJumpResetMs(int d) { jumpResetDelta = d; jumpResetVisibleTicks = config == null ? 30 : config.jumpResetDisplayTicks; }
     public static int jumpResetDelta() { return jumpResetDelta; }
     public static boolean jumpResetVisible() { return config != null && config.jumpResetEnabled && jumpResetVisibleTicks > 0; }
-
-    private static void clearEffectsAfterWorldChange(Minecraft client) {
-        if (client.level != lastLevel || client.player != lastPlayer) {
-            lastLevel = client.level;
-            lastPlayer = client.player;
-            if (client.player != null) {
-                client.player.removeAllEffects();
-            }
-        }
-    }
 
     public static void openConfigScreen(Screen parent) {
         Minecraft.getInstance().gui.setScreen(new HudForgeConfigScreen(parent));

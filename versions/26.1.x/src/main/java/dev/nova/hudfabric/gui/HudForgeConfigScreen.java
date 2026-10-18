@@ -2,6 +2,7 @@ package dev.nova.hudfabric.gui;
 
 import dev.nova.hudfabric.HudForgeClient;
 import dev.nova.hudfabric.config.HudForgeConfig;
+import net.fabricmc.loader.api.FabricLoader;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
@@ -14,9 +15,12 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
@@ -62,12 +66,36 @@ public final class HudForgeConfigScreen extends Screen {
         if (settingsOpen) {
             initSettings(config);
         } else {
+            keepModulesOnCanvas(config);
             addRenderableWidget(new HudButton(width - 132, height - 28, 120, 20, tr("button.settings"), button -> {
                 settingsOpen = true;
                 rebuildWidgets();
             }));
             addRenderableWidget(new HudButton(width - 258, height - 28, 120, 20, tr("button.done"), button -> onClose()));
         }
+    }
+
+    private void keepModulesOnCanvas(HudForgeConfig config) {
+        config.statsX = clamp(config.statsX, 0, Math.max(0, width - statsWidth(config)));
+        config.statsY = clamp(config.statsY, 0, Math.max(0, height - statsHeight(config)));
+        config.coordsX = clamp(config.coordsX, 0, Math.max(0, width - coordsWidth(config)));
+        config.coordsY = clamp(config.coordsY, 0, Math.max(0, height - coordsHeight(config)));
+        config.effectsX = clamp(config.effectsX, 0, Math.max(0, width - effectsWidth(config)));
+        config.effectsY = clamp(config.effectsY, 0, Math.max(0, height - effectsHeight(config)));
+        config.equipmentX = clamp(config.equipmentX, 0, Math.max(0, width - equipmentWidth(config)));
+        config.equipmentY = clamp(config.equipmentY, 0, Math.max(0, height - equipmentHeight(config)));
+        config.cpsX = clamp(config.cpsX, 0, Math.max(0, width - Math.round(config.cpsWidth * config.cpsScale)));
+        config.cpsY = clamp(config.cpsY, 0, Math.max(0, height - Math.round(22 * config.cpsScale)));
+        config.jumpResetX = clamp(config.jumpResetX, 0, Math.max(0, width - Math.round(config.jumpResetWidth * config.jumpResetScale)));
+        config.jumpResetY = clamp(config.jumpResetY, 0, Math.max(0, height - Math.round(24 * config.jumpResetScale)));
+        if (config.equipmentHotbarX >= 0) config.equipmentHotbarX = clamp(config.equipmentHotbarX, 0, Math.max(0, width - 82));
+        if (config.equipmentHotbarY >= 0) config.equipmentHotbarY = clamp(config.equipmentHotbarY, 0, Math.max(0, height - 22));
+        for (int i = 0; i < 4; i++) {
+            if (config.equipmentSlotX[i] >= 0) config.equipmentSlotX[i] = clamp(config.equipmentSlotX[i], 0, Math.max(0, width - 22));
+            if (config.equipmentSlotY[i] >= 0) config.equipmentSlotY[i] = clamp(config.equipmentSlotY[i], 0, Math.max(0, height - 22));
+        }
+        config.scoreboardX = clamp(config.scoreboardX, 0, Math.max(0, width - scoreboardWidth(config)));
+        config.scoreboardY = clamp(config.scoreboardY, 0, Math.max(0, height - scoreboardHeight(config)));
     }
 
     private void initSettings(HudForgeConfig config) {
@@ -77,12 +105,15 @@ public final class HudForgeConfigScreen extends Screen {
         int top = (height - panelH) / 2;
         int contentLeft = left + 132;
         int contentW = panelW - 142;
-        int viewportHeight = Math.max(20, panelH - 94);
-        settingsMaxScroll = switch (page) {
-            case SCOREBOARD -> 0;
-            case CROSSHAIR -> Math.max(0, 164 - viewportHeight);
-            default -> 0;
+        int contentEnd = switch (page) {
+            case SCOREBOARD -> activeModule == HudModule.EQUIPMENT ? 294 : activeModule == null ? compactLayout() ? 178 : 220 : 230;
+            case CROSSHAIR -> 300;
+            case EXTRAS -> 170;
+            case COLORS -> 206;
         };
+        int contentBottom = panelH - (compactLayout() && (page == SettingsPage.CROSSHAIR
+                || page == SettingsPage.SCOREBOARD && activeModule != null) ? 64 : 36);
+        settingsMaxScroll = Math.max(0, contentEnd - contentBottom);
         settingsScroll = clamp(settingsScroll, 0, settingsMaxScroll);
         int y = top + 78 - settingsScroll;
         int backY = top + panelH - 30;
@@ -171,7 +202,7 @@ public final class HudForgeConfigScreen extends Screen {
                 }
             }
             case CROSSHAIR -> {
-                int controlX = contentLeft + 16, controlW = Math.max(150, contentW / 2 - 30);
+                int controlX = contentLeft + 16, controlW = compactLayout() ? contentW - 32 : Math.max(150, contentW / 2 - 30);
                 addRenderableWidget(new HudButton(controlX, y, controlW, 20, crosshairButtonText(config.crosshairMode), button -> {
                     config.crosshairMode = (config.crosshairMode + 1) % 4;
                     config.customCrosshair = config.crosshairMode != HudForgeConfig.CROSSHAIR_VANILLA;
@@ -191,15 +222,36 @@ public final class HudForgeConfigScreen extends Screen {
                 addToggle(controlX, y, controlW, "toggle.crosshair_outline", config.crosshairOutline, value -> config.crosshairOutline = value);
                 y += 24;
                 addSlider(controlX, y, controlW, "slider.outline_thickness", config.crosshairOutlineThickness, 1, 4, value -> config.crosshairOutlineThickness = Math.round(value));
-                int colorX = colorPickerX(left, panelW);
-                addRenderableWidget(new HudButton(colorX, top + 78, 210, 20, tr("color.crosshair"), b -> { colorTarget = ColorTarget.CROSSHAIR; rebuildWidgets(); }));
-                addRenderableWidget(new HudButton(colorX, top + 102, 210, 20, tr("color.crosshair_outline"), b -> { colorTarget = ColorTarget.CROSSHAIR_OUTLINE; rebuildWidgets(); }));
+                if (compactLayout()) {
+                    addCompactColorButton(contentLeft, backY, ColorTarget.CROSSHAIR);
+                } else {
+                    int colorX = colorPickerX(left, panelW);
+                    addRenderableWidget(new HudButton(colorX, top + 78, 210, 20, tr("color.crosshair"), b -> { colorTarget = ColorTarget.CROSSHAIR; rebuildWidgets(); }));
+                    addRenderableWidget(new HudButton(colorX, top + 102, 210, 20, tr("color.crosshair_outline"), b -> { colorTarget = ColorTarget.CROSSHAIR_OUTLINE; rebuildWidgets(); }));
+                }
+                addResetButton(contentLeft, contentW, backY, "CROSSHAIR");
             }
             case COLORS -> {
-                addRenderableWidget(new HudButton(contentLeft + 10, backY, 120, 20, tr("button.clean_preset"), button -> {
-                    applyCleanPreset(config);
-                    rebuildWidgets();
-                }));
+                if (compactLayout()) {
+                    addRenderableWidget(new HudButton(contentLeft + 10, top + 56, contentW - 20, 20, tr(colorTarget.labelKey), button -> {
+                        ColorTarget[] targets = colorTarget == ColorTarget.CROSSHAIR || colorTarget == ColorTarget.CROSSHAIR_OUTLINE
+                                ? new ColorTarget[]{ColorTarget.CROSSHAIR, ColorTarget.CROSSHAIR_OUTLINE}
+                                : activeModule == null ? ColorTarget.values() : activeModule.colors;
+                        int index = java.util.Arrays.asList(targets).indexOf(colorTarget);
+                        colorTarget = targets[(index + 1) % targets.length];
+                        button.setMessage(tr(colorTarget.labelKey));
+                    }));
+                    addRenderableWidget(new HudButton(contentLeft + 10, backY, 120, 20, tr("button.back"), button -> {
+                        page = colorTarget == ColorTarget.CROSSHAIR || colorTarget == ColorTarget.CROSSHAIR_OUTLINE
+                                ? SettingsPage.CROSSHAIR : SettingsPage.SCOREBOARD;
+                        rebuildWidgets();
+                    }));
+                } else {
+                    addRenderableWidget(new HudButton(contentLeft + 10, backY, 120, 20, tr("button.clean_preset"), button -> {
+                        applyCleanPreset(config);
+                        rebuildWidgets();
+                    }));
+                }
             }
             case EXTRAS -> {
                 addToggle(contentLeft + 10, y, contentW - 20, "toggle.auto_respawn", config.autoRespawn, value -> config.autoRespawn = value);
@@ -209,6 +261,7 @@ public final class HudForgeConfigScreen extends Screen {
                 addSlider(contentLeft + 10, y, contentW - 20, "slider.respawn_delay", config.autoRespawnDelayTicks / 20.0f, 1, 5, value -> config.autoRespawnDelayTicks = Math.round(value * 20));
                 y += 24;
                 addSlider(contentLeft + 10, y, contentW - 20, "slider.reconnect_delay", config.autoReconnectDelaySeconds, 1, 60, value -> config.autoReconnectDelaySeconds = Math.round(value));
+                addResetButton(contentLeft, contentW, backY, "EXTRAS");
             }
         }
 
@@ -216,13 +269,14 @@ public final class HudForgeConfigScreen extends Screen {
             settingsOpen = false;
             rebuildWidgets();
         }));
-        updateScrollableWidgetVisibility(top + 54, backY - 6, left + 122, backY);
+        updateScrollableWidgetVisibility(top + 54, top + contentBottom, left + 122, backY);
     }
 
     private void updateScrollableWidgetVisibility(int contentTop, int contentBottom, int sidebarRight, int backY) {
         for (var element : children()) {
             if (element instanceof net.minecraft.client.gui.components.AbstractWidget widget) {
-                boolean fixed = widget.getX() < sidebarRight || widget.getY() == backY;
+                boolean fixed = widget.getX() < sidebarRight || widget.getY() == backY || widget.getY() == backY - 28
+                        || widget instanceof HudButton button && button.resetStyle;
                 widget.visible = fixed || widget.getY() >= contentTop && widget.getY() + widget.getHeight() <= contentBottom;
                 widget.active = widget.visible;
             }
@@ -261,7 +315,7 @@ public final class HudForgeConfigScreen extends Screen {
             if (click.button() == 0 && handleScrollbarClick(click.x(), click.y())) {
                 return true;
             }
-            if (((page == SettingsPage.SCOREBOARD && activeModule != null) || page == SettingsPage.CROSSHAIR) && click.button() == 0 && handleColorPick(click.x(), click.y())) {
+            if (((page == SettingsPage.SCOREBOARD && activeModule != null) || page == SettingsPage.CROSSHAIR || page == SettingsPage.COLORS) && click.button() == 0 && handleColorPick(click.x(), click.y())) {
                 return true;
             }
             return super.mouseClicked(click, doubleClick);
@@ -339,7 +393,7 @@ public final class HudForgeConfigScreen extends Screen {
                 updateScrollFromMouse(click.y());
                 return true;
             }
-            if (((page == SettingsPage.SCOREBOARD && activeModule != null) || page == SettingsPage.CROSSHAIR) && handleColorPick(click.x(), click.y())) {
+            if (((page == SettingsPage.SCOREBOARD && activeModule != null) || page == SettingsPage.CROSSHAIR || page == SettingsPage.COLORS) && handleColorPick(click.x(), click.y())) {
                 return true;
             }
             return super.mouseDragged(click, deltaX, deltaY);
@@ -425,6 +479,14 @@ public final class HudForgeConfigScreen extends Screen {
             }
         }
         return super.mouseDragged(click, deltaX, deltaY);
+    }
+
+    @Override
+    public void mouseMoved(double mouseX, double mouseY) {
+        if (!settingsOpen && dragTarget != DragTarget.NONE && Minecraft.getInstance().mouseHandler.isLeftPressed()) {
+            mouseDragged(new MouseButtonEvent(mouseX, mouseY, new MouseButtonInfo(0, 0)), 0, 0);
+        }
+        super.mouseMoved(mouseX, mouseY);
     }
 
     @Override
@@ -582,45 +644,52 @@ public final class HudForgeConfigScreen extends Screen {
         context.fill(left, top + panelH - 1, left + panelW, top + panelH, BORDER);
         context.fill(left, top, left + 1, top + panelH, BORDER);
         context.fill(left + panelW - 1, top, left + panelW, top + panelH, BORDER);
-        fillSoftRect(context, left + 14, top + 11, 26, 26, 7, 0xFF6878ED);
-        context.text(font, Component.literal("HF"), left + 21, top + 20, 0xFFFFFFFF);
+        context.blit(RenderPipelines.GUI_TEXTURED, Identifier.fromNamespaceAndPath("hudfabric", "icon/icon.png"), left + 14, top + 11, 0, 0, 26, 26, 128, 128, 128, 128);
         context.text(font, Component.literal("HudFabric"), left + 48, top + 20, WHITE);
         context.text(font, tr(page.titleKey), contentLeft + 10, top + 18, WHITE);
-        context.text(font, Component.literal("Modules & HUD Studio  •  1.0.5"), contentLeft + 10, top + 31, 0xFF8E9AB6);
+        context.text(font, Component.literal("HUD Studio  •  " + displayVersion()), contentLeft + 10, top + 31, 0xFF8E9AB6);
         if (page == SettingsPage.SCOREBOARD) {
             if (activeModule == null) {
                 context.text(font, tr("modules.hint"), contentLeft + 12, top + 57, 0xFF9DA8C3);
             } else {
                 int half = contentW / 2;
-                fillSoftRect(context, contentLeft + 6, top + 52, half - 12, panelH - 96, 7, 0x801A2438);
-                fillSoftRect(context, contentLeft + half, top + 52, half - 6, panelH - 96, 7, 0x801A2438);
+                fillSoftRect(context, contentLeft + 6, top + 52, compactLayout() ? contentW - 12 : half - 12, panelH - 96, 7, 0x801A2438);
+                if (!compactLayout()) fillSoftRect(context, contentLeft + half, top + 52, half - 6, panelH - 96, 7, 0x801A2438);
                 context.text(font, tr(activeModule.labelKey), contentLeft + 16, top + 57, 0xFF8A9BFF);
-                context.text(font, tr("modules.appearance"), contentLeft + half + 10, top + 57, 0xFF8A9BFF);
-                int pickerX = colorPickerX(left, panelW);
-                renderColorPicker(context, pickerX, top + 174, contentW / 2 - 34, colorTarget.get(HudForgeClient.config));
-                int swatchY = top + 90;
-                for (ColorTarget target : activeModule.colors) {
-                    fillSoftRect(context, pickerX + 188, swatchY, 16, 12, 3, target.get(HudForgeClient.config));
-                    swatchY += 24;
+                if (!compactLayout()) {
+                    context.text(font, tr("modules.appearance"), contentLeft + half + 10, top + 57, 0xFF8A9BFF);
+                    int pickerX = colorPickerX(left, panelW);
+                    renderColorPicker(context, pickerX, top + 174, contentW / 2 - 34, colorTarget.get(HudForgeClient.config));
+                    int swatchY = top + 90;
+                    for (ColorTarget target : activeModule.colors) {
+                        fillSoftRect(context, pickerX + 188, swatchY, 16, 12, 3, target.get(HudForgeClient.config));
+                        swatchY += 24;
+                    }
                 }
             }
         }
         if (page == SettingsPage.COLORS) {
-            renderColorTargets(context, contentLeft + 10, top + 58);
-            int pickerX = contentLeft + 222;
-            fillSoftRect(context, pickerX - 8, top + 54, contentW - 226, 224, 8, 0xA01A2438);
-            renderColorPicker(context, pickerX, top + 66, contentW - 238, colorTarget.get(HudForgeClient.config));
+            if (compactLayout()) {
+                renderColorPicker(context, colorPickerX(left, panelW), top + 85, contentW - 24, colorTarget.get(HudForgeClient.config));
+            } else {
+                renderColorTargets(context, contentLeft + 10, top + 58);
+                int pickerX = contentLeft + 222;
+                fillSoftRect(context, pickerX - 8, top + 54, contentW - 226, 224, 8, 0xA01A2438);
+                renderColorPicker(context, pickerX, top + 66, contentW - 238, colorTarget.get(HudForgeClient.config));
+            }
         }
         if (page == SettingsPage.CROSSHAIR) {
             int half = contentW / 2;
-            fillSoftRect(context, contentLeft + 6, top + 52, half - 12, panelH - 96, 7, 0x801A2438);
-            fillSoftRect(context, contentLeft + half, top + 52, half - 6, panelH - 96, 7, 0x801A2438);
+            fillSoftRect(context, contentLeft + 6, top + 52, compactLayout() ? contentW - 12 : half - 12, panelH - 96, 7, 0x801A2438);
+            if (!compactLayout()) fillSoftRect(context, contentLeft + half, top + 52, half - 6, panelH - 96, 7, 0x801A2438);
             context.text(font, tr("title.crosshair"), contentLeft + 16, top + 57, 0xFF8A9BFF);
-            context.text(font, tr("modules.appearance"), contentLeft + half + 10, top + 57, 0xFF8A9BFF);
-            int pickerX = colorPickerX(left, panelW);
-            renderColorPicker(context, pickerX, top + 150, contentW / 2 - 34, colorTarget.get(HudForgeClient.config));
-            fillSoftRect(context, pickerX + 188, top + 82, 16, 12, 3, HudForgeClient.config.crosshairColor);
-            fillSoftRect(context, pickerX + 188, top + 106, 16, 12, 3, HudForgeClient.config.crosshairOutlineColor);
+            if (!compactLayout()) {
+                context.text(font, tr("modules.appearance"), contentLeft + half + 10, top + 57, 0xFF8A9BFF);
+                int pickerX = colorPickerX(left, panelW);
+                renderColorPicker(context, pickerX, top + 150, contentW / 2 - 34, colorTarget.get(HudForgeClient.config));
+                fillSoftRect(context, pickerX + 188, top + 82, 16, 12, 3, HudForgeClient.config.crosshairColor);
+                fillSoftRect(context, pickerX + 188, top + 106, 16, 12, 3, HudForgeClient.config.crosshairOutlineColor);
+            }
         }
         if (settingsMaxScroll > 0) {
             int trackTop = scrollbarTrackTop();
@@ -687,12 +756,15 @@ public final class HudForgeConfigScreen extends Screen {
         }
         int previewX = x + square + 28;
         fillSoftRect(context, previewX, y, 26, 26, 4, color);
-        context.text(font, tr(colorTarget.labelKey), previewX, y + 34, WHITE);
+        int labelWidth = Math.max(16, (this.width + settingsPanelWidth()) / 2 - previewX - 16);
+        context.text(font, fitLabel(tr(colorTarget.labelKey).getString(), labelWidth), previewX, y + 34, WHITE);
         int inputY = alphaY + 18;
-        drawNumberBox(context, x, inputY, "R", (color >> 16) & 255);
-        drawNumberBox(context, x + 54, inputY, "G", (color >> 8) & 255);
-        drawNumberBox(context, x + 108, inputY, "B", color & 255);
-        drawNumberBox(context, x + 162, inputY, "A", alpha(color));
+        int boxW = compactLayout() ? 32 : 48;
+        int step = boxW + 4;
+        drawNumberBox(context, x, inputY, "R", (color >> 16) & 255, boxW);
+        drawNumberBox(context, x + step, inputY, "G", (color >> 8) & 255, boxW);
+        drawNumberBox(context, x + step * 2, inputY, "B", color & 255, boxW);
+        drawNumberBox(context, x + step * 3, inputY, "A", alpha(color), boxW);
     }
 
     private int colorTargetColumns(int panelW) {
@@ -704,8 +776,11 @@ public final class HudForgeConfigScreen extends Screen {
     }
 
     private int colorPickerX(int left, int panelW) {
+        if (compactLayout()) return left + 142;
         return left + 132 + (panelW - 142) / 2 + 10;
     }
+
+    private boolean compactLayout() { return settingsPanelWidth() < 600; }
 
     private int colorPickerSquare(int panelW) {
         int contentW = panelW - 142;
@@ -717,7 +792,7 @@ public final class HudForgeConfigScreen extends Screen {
         int left = (width - panelW) / 2;
         int top = (height - settingsPanelHeight()) / 2;
         int x = colorPickerX(left, panelW);
-        int y = top + (page == SettingsPage.CROSSHAIR ? 150 : 174);
+        int y = top + (page == SettingsPage.COLORS ? 85 : page == SettingsPage.CROSSHAIR ? 150 : 174);
         int square = colorPickerSquare(panelW);
         HudForgeConfig config = HudForgeClient.config;
         int current = colorTarget.get(config);
@@ -768,6 +843,12 @@ public final class HudForgeConfigScreen extends Screen {
         return Math.max(1, Math.min(900, width - 24));
     }
 
+    private static String displayVersion() {
+        return FabricLoader.getInstance().getModContainer("hudfabric")
+                .map(mod -> mod.getMetadata().getVersion().getFriendlyString().replaceFirst("-\\d+$", ""))
+                .orElse("1.0.7");
+    }
+
     private int settingsPanelHeight() {
         return Math.max(1, Math.min(520, height - 24));
     }
@@ -803,13 +884,13 @@ public final class HudForgeConfigScreen extends Screen {
         return font.plainSubstrByWidth(label, Math.max(8, maxWidth - font.width("..."))) + "...";
     }
 
-    private void drawNumberBox(GuiGraphicsExtractor context, int x, int y, String label, int value) {
-        context.fill(x, y, x + 48, y + 18, 0xFFE9EDF5);
-        context.fill(x, y, x + 48, y + 1, 0xFFB9C0CE);
-        context.fill(x, y + 17, x + 48, y + 18, 0xFFB9C0CE);
+    private void drawNumberBox(GuiGraphicsExtractor context, int x, int y, String label, int value, int boxW) {
+        context.fill(x, y, x + boxW, y + 18, 0xFFE9EDF5);
+        context.fill(x, y, x + boxW, y + 1, 0xFFB9C0CE);
+        context.fill(x, y + 17, x + boxW, y + 18, 0xFFB9C0CE);
         String text = String.valueOf(value);
-        context.text(font, text, x + 24 - font.width(text) / 2, y + 5, 0xFF111318, false);
-        context.text(font, label, x + 24 - font.width(label) / 2, y + 22, WHITE);
+        context.text(font, text, x + boxW / 2 - font.width(text) / 2, y + 5, 0xFF111318, false);
+        context.text(font, label, x + boxW / 2 - font.width(label) / 2, y + 22, WHITE);
     }
 
     private List<PlayerScoreEntry> scoreboardEntries(Objective objective) {
@@ -884,15 +965,20 @@ public final class HudForgeConfigScreen extends Screen {
 
     private void initModulePage(HudForgeConfig c, int left, int width, int y, int backY) {
         if (activeModule == null) {
-            int gap = 10, cardW = (width - 40) / 3, i = 0;
+            int gap = 10, columns = compactLayout() ? 2 : 3;
+            int cardHeight = compactLayout() ? 24 : 38;
+            int rowStep = compactLayout() ? 28 : 48;
+            int cardW = (width - 20 - (columns - 1) * gap) / columns, i = 0;
             for (HudModule module : HudModule.values()) {
-                int x = left + 10 + (i % 3) * (cardW + gap), cardY = y + 8 + (i / 3) * 48;
-                addRenderableWidget(new HudButton(x, cardY, cardW, 38, tr(module.labelKey), b -> { activeModule = module; if (module.colors.length > 0) colorTarget = module.colors[0]; settingsScroll = 0; rebuildWidgets(); }));
+                int x = left + 10 + (i % columns) * (cardW + gap);
+                int cardY = y + (compactLayout() ? -8 : 8) + (i / columns) * rowStep;
+                addRenderableWidget(new HudButton(x, cardY, cardW, cardHeight, tr(module.labelKey), b -> { activeModule = module; if (module.colors.length > 0) colorTarget = module.colors[0]; settingsScroll = 0; rebuildWidgets(); }));
                 i++;
             }
+            addResetButton(left, width, backY, "ALL");
             return;
         }
-        int x = left + 16, w = Math.max(150, width / 2 - 30), cy = y + 12;
+        int x = left + 16, w = compactLayout() ? width - 32 : Math.max(150, width / 2 - 30), cy = y + 12;
         switch (activeModule) {
             case SCOREBOARD -> {
                 addRenderableWidget(new HudButton(x, cy, w, 20, scoreboardButtonText(c.scoreboardMode), b -> { c.scoreboardMode = (c.scoreboardMode + 1) % 3; b.setMessage(scoreboardButtonText(c.scoreboardMode)); }));
@@ -948,12 +1034,41 @@ public final class HudForgeConfigScreen extends Screen {
             }
             case BLOCK_OUTLINE -> addToggle(x, cy, w, "toggle.block_outline", c.customBlockOutline, v -> c.customBlockOutline = v);
         }
-        int colorX = colorPickerX((this.width - settingsPanelWidth()) / 2, settingsPanelWidth()), colorY = y + 12;
-        for (ColorTarget target : activeModule.colors) {
-            addRenderableWidget(new HudButton(colorX, colorY, 210, 20, tr(target.labelKey), b -> { colorTarget = target; rebuildWidgets(); }));
-            colorY += 24;
+        if (compactLayout()) {
+            if (activeModule.colors.length > 0) addCompactColorButton(left, backY, activeModule.colors[0]);
+        } else {
+            int colorX = colorPickerX((this.width - settingsPanelWidth()) / 2, settingsPanelWidth()), colorY = y + 12;
+            for (ColorTarget target : activeModule.colors) {
+                addRenderableWidget(new HudButton(colorX, colorY, 210, 20, tr(target.labelKey), b -> { colorTarget = target; rebuildWidgets(); }));
+                colorY += 24;
+            }
         }
         addRenderableWidget(new HudButton(left + 10, backY, 120, 20, tr("button.modules_back"), b -> { activeModule = null; rebuildWidgets(); }));
+        addResetButton(left, width, backY, activeModule.name());
+    }
+
+    private void addResetButton(int left, int contentW, int backY, String scope) {
+        int buttonW = Math.min(148, Math.max(90, (contentW - 30) / 2));
+        int buttonY = backY;
+        HudButton button = new HudButton(left + contentW - buttonW - 10, buttonY, buttonW, 20,
+                tr(scope.equals("ALL") ? "button.reset_all" : "button.reset_module"), b -> {
+                    HudForgeClient.config.reset(scope);
+                    HudForgeClient.saveActiveServerProfile();
+                    HudForgeClient.config.save();
+                    settingsScroll = 0;
+                    rebuildWidgets();
+                });
+        button.setResetStyle(true);
+        addRenderableWidget(button);
+    }
+
+    private void addCompactColorButton(int left, int backY, ColorTarget target) {
+        addRenderableWidget(new HudButton(left + 10, backY - 28, 120, 20, tr("tab.colors"), button -> {
+            colorTarget = target;
+            page = SettingsPage.COLORS;
+            settingsScroll = 0;
+            rebuildWidgets();
+        }));
     }
 
     private void addToggle(int x, int y, int width, String key, boolean value, Consumer<Boolean> setter) {
@@ -1249,6 +1364,7 @@ public final class HudForgeConfigScreen extends Screen {
     private static final class HudButton extends AbstractButton {
         private final Consumer<HudButton> onPress;
         private boolean selectedStyle;
+        private boolean resetStyle;
 
         private HudButton(int x, int y, int width, int height, Component message, Consumer<HudButton> onPress) {
             super(x, y, width, height, message);
@@ -1259,6 +1375,10 @@ public final class HudForgeConfigScreen extends Screen {
             this.selectedStyle = selectedStyle;
         }
 
+        private void setResetStyle(boolean resetStyle) {
+            this.resetStyle = resetStyle;
+        }
+
         @Override
         public void onPress(InputWithModifiers input) {
             onPress.accept(this);
@@ -1266,12 +1386,16 @@ public final class HudForgeConfigScreen extends Screen {
 
         @Override
         protected void extractContents(GuiGraphicsExtractor context, int mouseX, int mouseY, float deltaTicks) {
-            int bg = selectedStyle || isHovered() || isHoveredOrFocused() ? CONTROL_HOVER : CONTROL;
+            int bg = resetStyle ? (isHovered() ? 0xD05C3941 : 0xC0392733)
+                    : selectedStyle || isHovered() || isHoveredOrFocused() ? CONTROL_HOVER : CONTROL;
             fillSoftRect(context, getX(), getY(), getWidth(), getHeight(), 3, bg);
-            drawBorder(context, getX(), getY(), getWidth(), getHeight(), selectedStyle || isHovered() || isHoveredOrFocused() ? BLUE : BORDER);
+            drawBorder(context, getX(), getY(), getWidth(), getHeight(), resetStyle ? 0xFFB77888
+                    : selectedStyle || isHovered() || isHoveredOrFocused() ? BLUE : BORDER);
             Font tr = Minecraft.getInstance().font;
-            Component message = getMessage();
-            context.text(tr, message, getX() + getWidth() / 2 - tr.width(message) / 2, getY() + (getHeight() - 8) / 2, WHITE);
+            String label = getMessage().getString();
+            int available = Math.max(8, getWidth() - 12);
+            if (tr.width(label) > available) label = tr.plainSubstrByWidth(label, available - tr.width("…")) + "…";
+            context.text(tr, Component.literal(label), getX() + getWidth() / 2 - tr.width(label) / 2, getY() + (getHeight() - 8) / 2, WHITE);
         }
 
         @Override

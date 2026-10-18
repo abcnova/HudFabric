@@ -7,9 +7,6 @@
   "authors": [
     "ABC_Nova"
   ],
-  "custom": {
-    "hudfabric:credits": "Built with Codex assistance."
-  },
   "license": "MIT",
   "icon": "assets/hudfabric/icon/icon.png",
   "environment": "client",
