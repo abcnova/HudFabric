@@ -14,4 +14,8 @@ public abstract class MouseMixin {
     private void hudfabric$recordMouseClick(long window, int button, int action, CallbackInfo ci) {
         if (action == GLFW.GLFW_PRESS) HudFabricClient.recordMouseClick(button);
     }
+    @Inject(method = "onCursorPos", at = @At("HEAD"))
+    private void hudfabric$dragLegacyHudButton(long window, double x, double y, CallbackInfo ci) { HudFabricClient.dragLegacyHudButton(x, y); }
+    @Inject(method = "onMouseButton", at = @At("HEAD"))
+    private void hudfabric$releaseLegacyHudButton(long window, int button, int action, CallbackInfo ci) { if (action == GLFW.GLFW_RELEASE && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) HudFabricClient.finishLegacyHudButtonDrag(); }
 }

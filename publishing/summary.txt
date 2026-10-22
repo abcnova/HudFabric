@@ -1,1 +1,1 @@
-A clean client-side Fabric HUD editor with movable modules, precise styling, per-module resets, and support for Minecraft 1.21.11 through 26.3.
+HudFabric 1.0.8: a client-side Fabric HUD editor for Minecraft 1.21 through 26.3, with privacy-safe settings codes, a repositionable pause-menu editor button, and resource-pack-aware hotbar slots.

@@ -26,7 +26,9 @@ public final class HudFabricConfig {
     public static final int CROSSHAIR_CIRCLE = 2;
     public static final int CROSSHAIR_DOT = 3;
 
-    public int configVersion = 14;
+    public int configVersion = 18;
+    public int hudEditorButtonX = -1;
+    public int hudEditorButtonY = -1;
     public int scoreboardMode = SCOREBOARD_CUSTOM;
     public boolean scoreboardEnabled = true;
     public float scoreboardScale = 1.0f;
@@ -161,7 +163,8 @@ public final class HudFabricConfig {
                 case "JUMP_RESET" -> name.startsWith("jumpReset");
                 case "BLOCK_OUTLINE" -> name.equals("customBlockOutline") || name.equals("blockOutlineColor");
                 case "CROSSHAIR" -> name.startsWith("crosshair") || name.equals("customCrosshair") || name.equals("hideVanillaCrosshair");
-                case "EXTRAS" -> name.startsWith("autoRespawn") || name.startsWith("autoReconnect");
+                case "EXTRAS" -> name.startsWith("autoRespawn") || name.startsWith("autoReconnect")
+                        || name.startsWith("hudEditorButton");
                 default -> false;
             };
             if (!matches) continue;
@@ -204,6 +207,8 @@ public final class HudFabricConfig {
     }
 
     public HudFabricConfig clamped() {
+        hudEditorButtonX = clamp(hudEditorButtonX, -1, 10000);
+        hudEditorButtonY = clamp(hudEditorButtonY, -1, 10000);
         if (!scoreboardEnabled) {
             scoreboardMode = hideVanillaScoreboard ? SCOREBOARD_HIDDEN : SCOREBOARD_VANILLA;
             scoreboardEnabled = true;
@@ -458,6 +463,12 @@ public final class HudFabricConfig {
             noteBoardEnabled = false;
             noteBoardX = 8; noteBoardY = 212; noteBoardScale = 1.0f; noteBoardText = "";
             configVersion = 17; save();
+        }
+        if (configVersion < 18) {
+            hudEditorButtonX = -1;
+            hudEditorButtonY = -1;
+            configVersion = 18;
+            save();
         }
     }
 

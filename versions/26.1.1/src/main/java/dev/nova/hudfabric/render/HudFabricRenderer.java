@@ -256,7 +256,10 @@ public final class HudFabricRenderer {
         context.pose().popMatrix();
     }
 
-    private static void drawIndependentVanillaSlot(GuiGraphicsExtractor context, int x, int y) { context.fill(x, y, x + 22, y + 22, 0xFF080808); context.fill(x + 1, y + 1, x + 21, y + 21, 0xFFB0B0B0); context.fill(x + 2, y + 2, x + 20, y + 20, 0xFF5A5A5A); context.fill(x + 3, y + 3, x + 19, y + 19, 0xCC151515); }
+    private static void drawIndependentVanillaSlot(GuiGraphicsExtractor context, int x, int y) {
+        Identifier hotbar = Identifier.withDefaultNamespace("hud/hotbar");
+        context.blitSprite(RenderPipelines.GUI_TEXTURED, hotbar, 182, 22, 20, 0, x, y, 20, 22, 0xFFFFFFFF);
+    }
 
     private static void renderEffectsPanel(GuiGraphicsExtractor context, Font textRenderer, HudFabricConfig config, List<EffectLine> lines) {
         int width = config.effectsWidth;

@@ -2,6 +2,12 @@
 
 ## 1.0.8
 
+- Added privacy-safe settings export/import codes that can be copied into Discord; server-specific profiles are not included or overwritten.
+- Added a pencil control and configurable Right Alt drag mode for repositioning the HUD Editor button in the pause menu.
+- Added the sharing screen and movable pause-menu button to all 17 supported Minecraft source targets.
+- Matched independent armor durability slots to Minecraft's vanilla hotbar sprite so resource-pack slot textures are used.
+- Kept the compact 1.0.6-style editor layout and existing reset behavior.
+- Built nine grouped JARs for Minecraft 1.21 through 26.3.
 - Added an editable, movable in-game note board.
 - Added a HUD counter for carried totems and the next active arrow type.
 - Added an optional armor-break warning; it is disabled by default.
@@ -9,7 +15,7 @@
 - Updated HUD editor input and rendering integrations for version-specific APIs.
 - Grouped compatible Minecraft versions into nine clearly named JARs.
 - Standardized the embedded mod version to 1.0.8 and added matching Minecraft compatibility ranges.
-- Shipped as a beta while 26.3 live-client dragging validation is pending.
+- Released as 1.0.8 with a note that live-client interaction still needs broader verification.
 
 ## 1.0.7
 

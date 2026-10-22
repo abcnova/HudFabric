@@ -6,6 +6,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Click;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.screen.Screen;
@@ -203,6 +204,11 @@ public final class HudFabricConfigScreen extends Screen {
                 addSlider(contentLeft + 10, y, contentW - 20, "slider.respawn_delay", config.autoRespawnDelayTicks / 20.0f, 1, 5, value -> config.autoRespawnDelayTicks = Math.round(value * 20));
                 y += 24;
                 addSlider(contentLeft + 10, y, contentW - 20, "slider.reconnect_delay", config.autoReconnectDelaySeconds, 1, 60, value -> config.autoReconnectDelaySeconds = Math.round(value));
+                y += 24;
+                addDrawableChild(new HudButton(contentLeft + 10, y, contentW - 20, 20, tr("hudfabric.share.open"), button -> {
+                    HudFabricClient.config.save();
+                    MinecraftClient.getInstance().setScreen(new HudFabricShareScreen(this));
+                }));
             }
         }
 
@@ -585,7 +591,10 @@ public final class HudFabricConfigScreen extends Screen {
         }
     }
 
-    private static void drawIndependentSlot(DrawContext context, int x, int y) { context.fill(x, y, x + 22, y + 22, 0xFF080808); context.fill(x + 1, y + 1, x + 21, y + 21, 0xFFB0B0B0); context.fill(x + 2, y + 2, x + 20, y + 20, 0xFF5A5A5A); context.fill(x + 3, y + 3, x + 19, y + 19, 0xCC151515); }
+    private static void drawIndependentSlot(DrawContext context, int x, int y) {
+        Identifier hotbar = Identifier.ofVanilla("hud/hotbar");
+        context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, hotbar, 182, 22, 20, 0, x, y, 20, 22);
+    }
 
     private int hotbarX(HudFabricConfig config) {
         if (config.equipmentHotbarX >= 0) return clamp(config.equipmentHotbarX, 0, Math.max(0, width - 82));

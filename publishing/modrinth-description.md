@@ -18,26 +18,23 @@ and style useful HUD modules directly in-game—no server installation required.
 - Jump Reset Indicator for PvP timing practice
 - Configurable crosshair, Crosshair Indicator, and block outline
 
-## Highlights in 1.0.7
+## Highlights in 1.0.8
 
-- Fixed module dragging on Minecraft 26.3 and verified it in a client game test
-- Restored the familiar editor layout with responsive handling for smaller windows
-- Added reset controls for individual modules, crosshair settings, extras, or everything
-- Kept moved HUD elements inside the visible canvas when the window size changes
-- Cleaned unsupported server glyphs from custom scoreboard titles
-- Clarified the Jump Reset Indicator Background and Text color controls
-- Preserved existing settings unless a reset button is used
+- Share HUD settings with a privacy-safe copy/paste code; server profiles and server addresses stay local
+- Move the pause-menu HUD Editor button with its pencil control or the configurable Right Alt key
+- Use the vanilla hotbar slot sprite for independent armor widgets, including resource-pack slot textures
+- Keep module reset controls and the familiar compact editor layout
 
 ## Compatibility
 
-Dedicated builds are available for Minecraft 1.21.11, 26.1, 26.1.1, 26.1.2,
-26.2, and 26.3. Match the downloaded JAR to the exact Minecraft version.
+Nine grouped builds cover Minecraft 1.21 through 1.21.11 and 26.1 through 26.3.
+Match the downloaded JAR to the Minecraft version range shown in its filename.
 
 Requirements: Fabric Loader, Fabric API, Java 21 for 1.21.11, and Java 25 for
 26.x. Mod Menu is optional.
 
 ## Languages
 
-English, German, and Spanish are included.
+English, German, French, and Spanish are included.
 
 HudFabric is open source under the MIT License.

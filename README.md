@@ -33,6 +33,9 @@ counter, and a movable in-game note board.
 - Editable, movable in-game note board
 - Server-specific profiles and settings migration
 - Auto-respawn and auto-reconnect helpers
+- Copyable, privacy-safe settings codes for sharing in Discord; imports preserve local server profiles
+- Repositionable pause-menu HUD Editor button with a pencil control and configurable Right Alt keybind
+- Independent armor hotbar slots use Minecraft's vanilla hotbar sprite, including resource-pack overrides
 
 ## Supported Minecraft versions
 
@@ -51,7 +54,7 @@ counter, and a movable in-game note board.
 ## Source layout
 
 - `versions/` – version-specific source projects for every supported game version
-- `artifacts/1.0.8-beta` – grouped release JARs
+- `artifacts/1.0.8` – grouped release JARs
 - `publishing/jar-matrix-1.0.8.md` – compatibility and verification notes
 - `history` – privacy-safe archives, resources, and reconstructed Java source
   for 1.0.0 through 1.0.3

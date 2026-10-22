@@ -1,6 +1,9 @@
 package dev.nova.hudfabric;
 
 import dev.nova.hudfabric.config.HudFabricConfig;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
+import dev.nova.hudfabric.gui.HudFabricShareScreen;
+import dev.nova.hudfabric.config.HudFabricShareCode;
 import dev.nova.hudfabric.gui.HudFabricConfigScreen;
 import dev.nova.hudfabric.render.HudFabricRenderer;
 import net.fabricmc.api.ClientModInitializer;
@@ -36,6 +39,8 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 import java.util.ArrayDeque;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public final class HudFabricClient implements ClientModInitializer {
     public static final String MOD_ID = "hudfabric";
@@ -43,6 +48,11 @@ public final class HudFabricClient implements ClientModInitializer {
 
     private static KeyBinding openConfigKey;
     private static KeyBinding editNoteBoardKey;
+    private static KeyBinding moveHudEditorKey;
+    private static boolean repositionHudEditor;
+    private static boolean draggingHudEditor;
+    private static int dragOffsetX;
+    private static int dragOffsetY;
     private static int totalTotems;
     private static ItemStack activeArrow = ItemStack.EMPTY;
     private static int activeArrowCount;
@@ -76,6 +86,10 @@ public final class HudFabricClient implements ClientModInitializer {
                 "key.hudfabric.edit_note_board",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_N,
+                "category.hudfabric"
+        ));
+        moveHudEditorKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.hudfabric.move_hud_editor", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_ALT,
                 "category.hudfabric"
         ));
 
@@ -120,17 +134,29 @@ public final class HudFabricClient implements ClientModInitializer {
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
             if (screen instanceof GameMenuScreen) {
                 int buttonWidth = Math.min(112, Math.max(88, scaledWidth / 5));
-                int buttonX = scaledWidth - buttonWidth - 10;
-                int buttonY = scaledHeight - 32;
-                for (ClickableWidget widget : Screens.getButtons(screen)) {
-                    if (overlaps(buttonX, buttonY, buttonWidth, 20, widget.getX(), widget.getY(), widget.getWidth(), widget.getHeight())) {
-                        buttonY = Math.max(8, widget.getY() - 24);
+                int buttonX = config.hudEditorButtonX < 0 ? scaledWidth - buttonWidth - 32 : Math.max(0, Math.min(config.hudEditorButtonX, scaledWidth - buttonWidth - 22));
+                int buttonY = config.hudEditorButtonY < 0 ? scaledHeight - 32 : Math.max(0, Math.min(config.hudEditorButtonY, scaledHeight - 20));
+                if (config.hudEditorButtonX < 0 && config.hudEditorButtonY < 0) for (ClickableWidget widget : Screens.getButtons(screen)) if (overlaps(buttonX, buttonY, buttonWidth + 22, 20, widget.getX(), widget.getY(), widget.getWidth(), widget.getHeight())) buttonY = Math.max(8, widget.getY() - 24);
+                repositionHudEditor = false;
+                ButtonWidget editorButton = ButtonWidget.builder(Text.translatable("hudfabric.button.hud_editor"), button -> openConfigScreen(screen)).dimensions(buttonX, buttonY, buttonWidth, 20).build();
+                ButtonWidget editButton = ButtonWidget.builder(Text.literal("✎"), button -> { repositionHudEditor = !repositionHudEditor; button.setMessage(Text.literal(repositionHudEditor ? "✓" : "✎")); editorButton.active = !repositionHudEditor; }).dimensions(buttonX + buttonWidth + 2, buttonY, 20, 20).build();
+                Screens.getButtons(screen).add(editorButton); Screens.getButtons(screen).add(editButton);
+                ScreenMouseEvents.allowMouseClick(screen).register((current, mouseX, mouseY, button) -> {
+                    if (current == screen && (repositionHudEditor || moveHudEditorKey.isPressed()) && button == 0
+                            && mouseX >= editorButton.getX() && mouseX < editorButton.getX() + editorButton.getWidth()
+                            && mouseY >= editorButton.getY() && mouseY < editorButton.getY() + editorButton.getHeight()) {
+                        draggingHudEditor = true; dragOffsetX = (int) mouseX - editorButton.getX(); dragOffsetY = (int) mouseY - editorButton.getY();
+                        HudFabricClient.beginLegacyHudButtonDrag(editorButton, editButton, scaledWidth, scaledHeight);
+                        return false;
                     }
-                }
-                Screens.getButtons(screen).add(ButtonWidget.builder(Text.translatable("hudfabric.button.hud_editor"), button -> openConfigScreen(screen))
-                        .dimensions(buttonX, buttonY, buttonWidth, 20)
-                        .build());
+                    return true;
+                });
+                ScreenMouseEvents.allowMouseRelease(screen).register((current, mouseX, mouseY, button) -> {
+                    if (current == screen && draggingHudEditor && button == 0) { finishLegacyHudButtonDrag(); return false; }
+                    return true;
+                });
             }
+
             if (screen instanceof DisconnectedScreen && lastServer != null) {
                 reconnectTicks = Math.max(20, config.autoReconnectDelaySeconds * 20);
                 reconnectButton = ButtonWidget.builder(reconnectText(), button -> reconnect(client))
@@ -296,6 +322,24 @@ public final class HudFabricClient implements ClientModInitializer {
     public static void openConfigScreen(Screen parent) {
         MinecraftClient.getInstance().setScreen(new HudFabricConfigScreen(parent));
     }
+
+    private static ButtonWidget legacyDraggedEditorButton;
+    private static ButtonWidget legacyDraggedEditButton;
+    private static int legacyDragWidth;
+    private static int legacyDragHeight;
+    public static void beginLegacyHudButtonDrag(ButtonWidget editor, ButtonWidget pencil, int screenWidth, int screenHeight) { legacyDraggedEditorButton=editor; legacyDraggedEditButton=pencil; legacyDragWidth=screenWidth; legacyDragHeight=screenHeight; }
+    public static void dragLegacyHudButton(double x, double y) {
+        if (!draggingHudEditor || legacyDraggedEditorButton == null) return;
+        double scale=MinecraftClient.getInstance().getWindow().getScaleFactor();
+        int nx=Math.max(0,Math.min((int)(x/scale)-dragOffsetX,legacyDragWidth-legacyDraggedEditorButton.getWidth()-22));
+        int ny=Math.max(0,Math.min((int)(y/scale)-dragOffsetY,legacyDragHeight-legacyDraggedEditorButton.getHeight()));
+        legacyDraggedEditorButton.setPosition(nx,ny); legacyDraggedEditButton.setPosition(nx+legacyDraggedEditorButton.getWidth()+2,ny); config.hudEditorButtonX=nx; config.hudEditorButtonY=ny;
+    }
+    public static void finishLegacyHudButtonDrag() { if(!draggingHudEditor)return; draggingHudEditor=false; legacyDraggedEditorButton=null; legacyDraggedEditButton=null; config.save(); }
+
+    public static String exportSettingsShareCode() { Map<String,String> keys=new LinkedHashMap<>(); keys.put("openEditor",openConfigKey.getBoundKeyTranslationKey()); keys.put("moveEditorButton",moveHudEditorKey.getBoundKeyTranslationKey()); keys.put("editNoteBoard",editNoteBoardKey.getBoundKeyTranslationKey()); return HudFabricShareCode.encode(config,keys); }
+    public static void importSettingsShareCode(String code) { Map<String,String> keys=HudFabricShareCode.decodeAndApply(code,config); applyKey(openConfigKey,keys.get("openEditor")); applyKey(moveHudEditorKey,keys.get("moveEditorButton")); applyKey(editNoteBoardKey,keys.get("editNoteBoard")); MinecraftClient.getInstance().options.write(); saveActiveServerProfile(); }
+    private static void applyKey(KeyBinding mapping,String value) { if(value!=null&&!value.isBlank()) mapping.setBoundKey(InputUtil.fromTranslationKey(value)); }
 
     public static void saveActiveServerProfile() {
         if (config != null && activeServerKey != null && !activeServerKey.isBlank()) {

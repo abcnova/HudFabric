@@ -14,8 +14,8 @@ Nine compatibility JARs cover the requested Minecraft versions from 1.21 through
 | 8 | `HudFabric-1.0.8-8-26.2.jar` | 26.2 | `versions/26.2` |
 | 9 | `HudFabric-1.0.8-9-26.3.jar` | 26.3 | `versions/26.3` |
 
-All 17 individual target projects passed `clean build` on 2026-10-22. Each range JAR is packaged from the oldest version in its group; the Minecraft dependency range is embedded in `fabric.mod.json`. These builds confirm source compilation for every listed target, but do not replace an in-game runtime test on each version.
+All 17 individual target projects passed Gradle `build` on 2026-10-22. Each range JAR is packaged from the oldest version in its group; the Minecraft dependency range is embedded in `fabric.mod.json`. These builds confirm source compilation for every listed target, but do not replace an in-game runtime test on each version.
 
-The 26.3 client game test reached client startup after the key-category fix, then the Java process exited with Windows status `0xC0000005` before reporting test results. Module dragging therefore remains unverified in a live 26.3 client. The GitHub release should remain a prerelease for this user-facing check.
+The 26.3 client game test reached client startup after the key-category fix, then the Java process exited with Windows status `0xC0000005` before reporting test results. Module dragging therefore remains unverified in a live 26.3 client; this limitation is disclosed in the release notes.
 
-Final artifacts are stored in `artifacts/1.0.8-beta/`. Do not include `*-sources.jar` or `*-dev.jar` in the release assets.
+Final artifacts are stored in `artifacts/1.0.8/`. Do not include `*-sources.jar` or `*-dev.jar` in the release assets.
