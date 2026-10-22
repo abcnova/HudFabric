@@ -6,7 +6,8 @@
 
 HudFabric is a client-side Fabric HUD mod by **ABC_Nova**. It provides a clean,
 modular editor for the scoreboard, FPS/ping, coordinates and biome, potion
-effects, CPS, crosshair, block outline, and armor/tool durability.
+effects, CPS, crosshair, block outline, armor/tool durability, an inventory
+counter, and a movable in-game note board.
 
 [Download on Modrinth](https://modrinth.com/mod/hudfabric) ·
 [Download on CurseForge](https://www.curseforge.com/minecraft/mc-mods/hudfabric) ·
@@ -27,27 +28,31 @@ effects, CPS, crosshair, block outline, and armor/tool durability.
 - Optional hotbar-style armor widget with left/right placement
 - Bar, numeric, or percentage durability display
 - Low-durability warning threshold
+- Optional armor-break warning (disabled by default)
+- Totem and active-arrow counter
+- Editable, movable in-game note board
 - Server-specific profiles and settings migration
 - Auto-respawn and auto-reconnect helpers
 
 ## Supported Minecraft versions
 
-| Minecraft | Artifact |
+| Minecraft versions | Release artifact |
 | --- | --- |
-| 1.21.11 | `HudFabric-1.0.7-1.21.11.jar` |
-| 26.1 | `HudFabric-1.0.7-2-26.1.jar` |
-| 26.1.1 | `HudFabric-1.0.7-3-26.1.1.jar` |
-| 26.1.2 | `HudFabric-1.0.7-4-26.1.2.jar` |
-| 26.2 | `HudFabric-1.0.7-5-26.2.jar` |
-| 26.3 | `HudFabric-1.0.7-6-26.3.jar` |
+| 1.21–1.21.1 | `HudFabric-1.0.8-1.21-1.21.1.jar` |
+| 1.21.2–1.21.5 | `HudFabric-1.0.8-2-1.21.2-1.21.5.jar` |
+| 1.21.6–1.21.7 | `HudFabric-1.0.8-3-1.21.6-1.21.7.jar` |
+| 1.21.8 | `HudFabric-1.0.8-4-1.21.8.jar` |
+| 1.21.9–1.21.10 | `HudFabric-1.0.8-5-1.21.9-1.21.10.jar` |
+| 1.21.11 | `HudFabric-1.0.8-6-1.21.11.jar` |
+| 26.1–26.1.2 | `HudFabric-1.0.8-7-26.1-26.1.2.jar` |
+| 26.2 | `HudFabric-1.0.8-8-26.2.jar` |
+| 26.3 | `HudFabric-1.0.8-9-26.3.jar` |
 
 ## Source layout
 
-- `versions/1.21.11` – Yarn-based 1.21.11 source
-- `versions/26.1.x` – Mojang-mapped 26.1.x source
-- `versions/26.2` – Mojang-mapped 26.2 source
-- `versions/26.3` – Mojang-mapped 26.3 source
-- `artifacts/1.0.7` – locally built release candidates
+- `versions/` – version-specific source projects for every supported game version
+- `artifacts/1.0.8-beta` – grouped release JARs
+- `publishing/jar-matrix-1.0.8.md` – compatibility and verification notes
 - `history` – privacy-safe archives, resources, and reconstructed Java source
   for 1.0.0 through 1.0.3
 

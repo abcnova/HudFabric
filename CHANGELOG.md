@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.8
+
+- Added an editable, movable in-game note board.
+- Added a HUD counter for carried totems and the next active arrow type.
+- Added an optional armor-break warning; it is disabled by default.
+- Added per-module and full-configuration reset controls with saved defaults.
+- Updated HUD editor input and rendering integrations for version-specific APIs.
+- Grouped compatible Minecraft versions into nine clearly named JARs.
+- Standardized the embedded mod version to 1.0.8 and added matching Minecraft compatibility ranges.
+- Shipped as a beta while 26.3 live-client dragging validation is pending.
+
 ## 1.0.7
 
 - Fixed module dragging on Minecraft 26.3 and verified it with a client game test.

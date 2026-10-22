@@ -12,10 +12,10 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "dev.nova.hudfabric.HudForgeClient"
+      "dev.nova.hudfabric.HudFabricClient"
     ],
     "modmenu": [
-      "dev.nova.hudfabric.integration.HudForgeModMenu"
+      "dev.nova.hudfabric.integration.HudFabricModMenu"
     ]
   },
   "mixins": [

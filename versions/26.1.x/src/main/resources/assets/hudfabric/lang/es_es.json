@@ -118,5 +118,19 @@
   "hudfabric.jump_reset.late": "%s ms demasiado tarde",
   "hudfabric.jump_reset.mode.target": "Texto junto al objetivo",
   "hudfabric.jump_reset.mode.panel": "Panel movible",
-  "hudfabric.jump_reset.missed": "Reinicio fallido"
+  "hudfabric.jump_reset.missed": "Reinicio fallido",
+  "hudfabric.toggle.note_board": "Panel de notas del juego",
+  "hudfabric.equipment.break_sound": "Aviso de rotura: Visual + sonido",
+  "hudfabric.toggle.inventory_counters": "Contador de totems y flechas",
+  "hudfabric.module.note_board": "Panel de notas",
+  "hudfabric.note.edit": "Editar nota",
+  "hudfabric.module.inventory_counters": "Totems / Flechas",
+  "hudfabric.note.empty": "Pulsa N para anadir una nota",
+  "hudfabric.note.edit_hint": "N para editar",
+  "key.hudfabric.edit_note_board": "Editar panel de notas",
+  "hudfabric.equipment.break_visual": "Aviso de rotura: Visual",
+  "hudfabric.note.title": "NOTAS",
+  "hudfabric.note.editor_hint": "Hasta cinco lineas cortas. Las notas se guardan en este dispositivo.",
+  "hudfabric.note.editor_title": "Panel de notas del juego",
+  "hudfabric.equipment.break_off": "Aviso de rotura: Desactivado"
 }

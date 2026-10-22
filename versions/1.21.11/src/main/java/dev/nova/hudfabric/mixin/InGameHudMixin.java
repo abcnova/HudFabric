@@ -1,7 +1,7 @@
 package dev.nova.hudfabric.mixin;
 
-import dev.nova.hudfabric.HudForgeClient;
-import dev.nova.hudfabric.config.HudForgeConfig;
+import dev.nova.hudfabric.HudFabricClient;
+import dev.nova.hudfabric.config.HudFabricConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
@@ -18,27 +18,27 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(InGameHud.class)
 public abstract class InGameHudMixin {
     @Inject(method = "renderScoreboardSidebar(Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/scoreboard/ScoreboardObjective;)V", at = @At("HEAD"), cancellable = true)
-    private void hudforge$hideVanillaScoreboard(DrawContext context, ScoreboardObjective objective, CallbackInfo ci) {
-        if (HudForgeClient.config != null && HudForgeClient.config.scoreboardMode != HudForgeConfig.SCOREBOARD_VANILLA) {
+    private void hudfabric$hideVanillaScoreboard(DrawContext context, ScoreboardObjective objective, CallbackInfo ci) {
+        if (HudFabricClient.config != null && HudFabricClient.config.scoreboardMode != HudFabricConfig.SCOREBOARD_VANILLA) {
             ci.cancel();
         }
     }
 
     @Inject(method = "renderCrosshair", at = @At("HEAD"), cancellable = true)
-    private void hudforge$hideVanillaCrosshair(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
-        if (HudForgeClient.config != null
-                && HudForgeClient.config.crosshairMode != HudForgeConfig.CROSSHAIR_VANILLA
+    private void hudfabric$hideVanillaCrosshair(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+        if (HudFabricClient.config != null
+                && HudFabricClient.config.crosshairMode != HudFabricConfig.CROSSHAIR_VANILLA
                 && MinecraftClient.getInstance().options.getPerspective().isFirstPerson()) {
             ci.cancel();
         }
     }
 
     @Inject(method = "renderCrosshair", at = @At("TAIL"))
-    private void hudforge$renderCrosshairIndicator(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+    private void hudfabric$renderCrosshairIndicator(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
         MinecraftClient client = MinecraftClient.getInstance();
-        if (HudForgeClient.config != null
-                && HudForgeClient.config.crosshairMode == HudForgeConfig.CROSSHAIR_VANILLA
-                && HudForgeClient.config.crosshairIndicator
+        if (HudFabricClient.config != null
+                && HudFabricClient.config.crosshairMode == HudFabricConfig.CROSSHAIR_VANILLA
+                && HudFabricClient.config.crosshairIndicator
                 && client.currentScreen == null
                 && client.options.getPerspective().isFirstPerson()
                 && client.targetedEntity instanceof PlayerEntity) {
@@ -48,8 +48,8 @@ public abstract class InGameHudMixin {
     }
 
     @Inject(method = "renderStatusEffectOverlay", at = @At("HEAD"), cancellable = true)
-    private void hudforge$hideVanillaEffects(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
-        if (HudForgeClient.config != null && HudForgeClient.config.effectsEnabled && HudForgeClient.config.hideVanillaEffects) {
+    private void hudfabric$hideVanillaEffects(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+        if (HudFabricClient.config != null && HudFabricClient.config.effectsEnabled && HudFabricClient.config.hideVanillaEffects) {
             ci.cancel();
         }
     }

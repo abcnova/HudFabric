@@ -1,6 +1,6 @@
 package dev.nova.hudfabric.mixin;
 
-import dev.nova.hudfabric.HudForgeClient;
+import dev.nova.hudfabric.HudFabricClient;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.input.MouseButtonInfo;
 import org.lwjgl.glfw.GLFW;
@@ -13,6 +13,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MouseMixin {
     @Inject(method = "onButton", at = @At("HEAD"))
     private void hudfabric$recordMouseClick(long window, MouseButtonInfo info, int action, CallbackInfo ci) {
-        if (action == GLFW.GLFW_PRESS) HudForgeClient.recordMouseClick(info.button());
+        if (action == GLFW.GLFW_PRESS) HudFabricClient.recordMouseClick(info.button());
     }
 }

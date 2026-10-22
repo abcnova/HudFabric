@@ -1,0 +1,16 @@
+{
+  "hudfabric.toggle.note_board": "Bloc-notes en jeu",
+  "hudfabric.equipment.break_sound": "Alerte de casse : visuelle + son",
+  "hudfabric.toggle.inventory_counters": "Compteur de totems et de fleches",
+  "hudfabric.module.note_board": "Bloc-notes",
+  "hudfabric.note.edit": "Modifier la note",
+  "hudfabric.module.inventory_counters": "Totems / Fleches",
+  "hudfabric.note.empty": "Appuyez sur N pour ajouter une note",
+  "hudfabric.note.edit_hint": "N pour modifier",
+  "key.hudfabric.edit_note_board": "Modifier le bloc-notes",
+  "hudfabric.equipment.break_visual": "Alerte de casse : visuelle",
+  "hudfabric.note.title": "NOTES",
+  "hudfabric.note.editor_hint": "Jusqua cinq lignes courtes. Les notes restent sur cet appareil.",
+  "hudfabric.note.editor_title": "Bloc-notes en jeu",
+  "hudfabric.equipment.break_off": "Alerte de casse : desactivee"
+}

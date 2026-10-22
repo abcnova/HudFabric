@@ -118,5 +118,19 @@
   "hudfabric.jump_reset.late": "%s ms too late",
   "hudfabric.jump_reset.mode.target": "Text by target",
   "hudfabric.jump_reset.mode.panel": "Movable panel",
-  "hudfabric.jump_reset.missed": "Missed reset"
+  "hudfabric.jump_reset.missed": "Missed reset",
+  "hudfabric.toggle.note_board": "In-game note board",
+  "hudfabric.equipment.break_sound": "Armor break alert: Visual + Sound",
+  "hudfabric.toggle.inventory_counters": "Totem and arrow counter",
+  "hudfabric.module.note_board": "Note Board",
+  "hudfabric.note.edit": "Edit note",
+  "hudfabric.module.inventory_counters": "Totems / Arrows",
+  "hudfabric.note.empty": "Press N to add a note",
+  "hudfabric.note.edit_hint": "N to edit",
+  "key.hudfabric.edit_note_board": "Edit note board",
+  "hudfabric.equipment.break_visual": "Armor break alert: Visual",
+  "hudfabric.note.title": "NOTES",
+  "hudfabric.note.editor_hint": "Enter up to five short lines. Notes stay on this device.",
+  "hudfabric.note.editor_title": "In-game note board",
+  "hudfabric.equipment.break_off": "Armor break alert: Off"
 }

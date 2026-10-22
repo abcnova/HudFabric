@@ -1,6 +1,6 @@
 package dev.nova.hudfabric.mixin;
 
-import dev.nova.hudfabric.HudForgeClient;
+import dev.nova.hudfabric.HudFabricClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,7 +13,7 @@ public abstract class LivingEntityMixin {
     @Inject(method = "jumpFromGround", at = @At("HEAD"))
     private void hudfabric$recordRealLocalJump(CallbackInfo ci) {
         if ((Object) this == Minecraft.getInstance().player) {
-            HudForgeClient.onLocalJump();
+            HudFabricClient.onLocalJump();
         }
     }
 }

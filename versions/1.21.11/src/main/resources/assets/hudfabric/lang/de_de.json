@@ -118,5 +118,19 @@
   "hudfabric.jump_reset.late": "%s ms zu spät",
   "hudfabric.jump_reset.mode.target": "Text am Gegner",
   "hudfabric.jump_reset.mode.panel": "Verschiebbares Panel",
-  "hudfabric.jump_reset.missed": "Reset verpasst"
+  "hudfabric.jump_reset.missed": "Reset verpasst",
+  "hudfabric.toggle.note_board": "Notizbrett im Spiel",
+  "hudfabric.equipment.break_sound": "Ruestungsbruchwarnung: Visuell + Ton",
+  "hudfabric.toggle.inventory_counters": "Totem- und Pfeilzaehler",
+  "hudfabric.module.note_board": "Notizbrett",
+  "hudfabric.note.edit": "Notiz bearbeiten",
+  "hudfabric.module.inventory_counters": "Totems / Pfeile",
+  "hudfabric.note.empty": "N druecken, um eine Notiz hinzuzufuegen",
+  "hudfabric.note.edit_hint": "N zum Bearbeiten",
+  "key.hudfabric.edit_note_board": "Notizbrett bearbeiten",
+  "hudfabric.equipment.break_visual": "Ruestungsbruchwarnung: Visuell",
+  "hudfabric.note.title": "NOTIZEN",
+  "hudfabric.note.editor_hint": "Bis zu fuenf kurze Zeilen. Notizen bleiben auf diesem Geraet.",
+  "hudfabric.note.editor_title": "Notizbrett im Spiel",
+  "hudfabric.equipment.break_off": "Ruestungsbruchwarnung: Aus"
 }
