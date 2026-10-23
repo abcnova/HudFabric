@@ -320,22 +320,31 @@ public final class HudFabricRenderer {
         List<String> lines = new ArrayList<>();
         for (String line : config.noteBoardText.split("\\n", -1)) {
             if (lines.size() == 5) break;
-            lines.add(line.isBlank() ? " " : trimToWidth(client.textRenderer, line, 190));
+            lines.add(line.isBlank() ? " " : trimToWidth(client.textRenderer, line, 178));
         }
         if (config.noteBoardText.isBlank()) lines = List.of(Text.translatable("hudfabric.note.empty").getString());
-        int width = 210, height = 23 + lines.size() * 12;
-        int alpha = 150 + (int) (80 * (0.5 + 0.5 * Math.sin(System.currentTimeMillis() / 500.0)));
+        int width = 210, height = Math.max(56, 44 + lines.size() * 12);
         context.getMatrices().pushMatrix();
         context.getMatrices().translate(config.noteBoardX, config.noteBoardY);
         context.getMatrices().scale(config.noteBoardScale, config.noteBoardScale);
-        fillSoftRect(context, 0, 0, width, height, 6, 0xD90A1020);
-        fillSoftRect(context, 0, 0, width, 20, 6, 0xEE18243A);
-        context.fill(0, 0, 2, height, (alpha << 24) | 0x7286FF);
-        context.drawTextWithShadow(client.textRenderer, Text.translatable("hudfabric.note.title"), 9, 6, 0xFFEAF0FF);
+        context.fill(2, 3, width, height, 0x66000000);
+        context.fill(0, 0, width - 2, height - 3, 0xFF50321E);
+        context.fill(2, 2, width - 4, height - 5, 0xFF9A6336);
+        context.fill(4, 4, width - 6, height - 7, 0xFF684326);
+        context.fill(7, 7, width - 9, height - 10, 0xFF98744A);
+        context.fill(10, 10, width - 12, height - 13, 0xFFE8D8B5);
+        context.fill(12, 12, width - 14, 21, 0xFFF4E9CF);
+        context.fill(width / 2 - 2, 8, width / 2 + 3, 13, 0xFF8B2520);
+        context.fill(width / 2 - 1, 8, width / 2 + 2, 11, 0xFFE35B43);
+        context.drawTextWithShadow(client.textRenderer, Text.translatable("hudfabric.note.title"), 15, 14, 0xFF49351F);
         String hint = Text.translatable("hudfabric.note.edit_hint").getString();
-        context.drawTextWithShadow(client.textRenderer, hint, width - client.textRenderer.getWidth(hint) - 8, 6, 0xFF9DA8C3);
-        int y = 25;
-        for (String line : lines) { context.drawTextWithShadow(client.textRenderer, line, 9, y, 0xFFEAF0FF); y += 12; }
+        context.drawTextWithShadow(client.textRenderer, hint, width - client.textRenderer.getWidth(hint) - 16, 14, 0xFF766347);
+        int y = 31;
+        for (String line : lines) {
+            context.drawTextWithShadow(client.textRenderer, line, 15, y, 0xFF49351F);
+            context.fill(14, y + 10, width - 14, y + 11, 0x667D6546);
+            y += 12;
+        }
         context.getMatrices().popMatrix();
     }
 

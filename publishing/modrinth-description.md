@@ -24,6 +24,8 @@ and style useful HUD modules directly in-game—no server installation required.
 - Move the pause-menu HUD Editor button with its pencil control or the configurable Right Alt key
 - Use the vanilla hotbar slot sprite for independent armor widgets, including resource-pack slot textures
 - Keep module reset controls and the familiar compact editor layout
+- Use the redesigned personal note board with a Minecraft-style wood frame, cork backing, pinned paper, and ruled writing lines
+- Drag HUD modules and reposition the pause-menu HUD Editor button with the updated 26.x mouse-input handling (26.3 live confirmation is pending)
 
 ## Compatibility
 
@@ -32,6 +34,8 @@ Match the downloaded JAR to the Minecraft version range shown in its filename.
 
 Requirements: Fabric Loader, Fabric API, Java 21 for 1.21.11, and Java 25 for
 26.x. Mod Menu is optional.
+
+The note board is local to your client and is not shared with other players.
 
 ## Languages
 

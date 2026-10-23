@@ -509,7 +509,7 @@ public final class HudFabricConfigScreen extends Screen {
 
     @Override
     public void mouseMoved(double mouseX, double mouseY) {
-        if (!settingsOpen && dragTarget != DragTarget.NONE && Minecraft.getInstance().mouseHandler.isLeftPressed()) {
+        if (!settingsOpen && dragTarget != DragTarget.NONE) {
             mouseDragged(new MouseButtonEvent(mouseX, mouseY, new MouseButtonInfo(0, 0)), 0, 0);
         }
         super.mouseMoved(mouseX, mouseY);
@@ -580,23 +580,29 @@ public final class HudFabricConfigScreen extends Screen {
     private void renderNoteBoardPreview(GuiGraphicsExtractor context, HudFabricConfig config) {
         int w = noteBoardWidth(config), h = noteBoardHeight(config);
         context.pose().pushMatrix(); context.pose().translate(config.noteBoardX, config.noteBoardY); context.pose().scale(config.noteBoardScale, config.noteBoardScale);
-        fillSoftRect(context, 0, 0, w, h, 7, 0xE00A1020); context.fill(9, 8, 11, h - 8, 0xFF7286FF);
-        context.text(font, tr("module.note_board").getString(), 18, 7, 0xFFEAF0FF);
+        context.fill(3, 4, w, h, 0x88000000); context.fill(0, 0, w - 2, h - 2, 0xFF382317);
+        context.fill(2, 2, w - 4, h - 4, 0xFF9A6036); context.fill(4, 4, w - 6, h - 6, 0xFF52321E);
+        for (int y = 6; y < h - 7; y += 9) context.fill(4, y, w - 6, y + 1, y / 9 % 2 == 0 ? 0x557F4D2D : 0x55613720);
+        context.fill(7, 7, w - 9, h - 9, 0xFF986A43);
+        for (int y = 10; y < h - 11; y += 8) { int offset = (y / 8 % 2) * 5; for (int x = 11 + offset; x < w - 12; x += 13) context.fill(x, y, x + 1, y + 1, 0x55754B30); }
+        context.fill(10, 10, w - 12, h - 12, 0xFFFFE9B7); context.fill(11, 11, w - 13, h - 13, 0xFFFFF3D4);
+        context.fill(w / 2 - 2, 7, w / 2 + 2, 11, 0xFF7D211B); context.fill(w / 2 - 1, 7, w / 2 + 1, 9, 0xFFE35D44);
+        context.text(font, tr("module.note_board").getString(), 15, 14, 0xFF56351F);
         String[] lines = config.noteBoardText == null || config.noteBoardText.isBlank() ? new String[]{tr("note.empty").getString()} : config.noteBoardText.split("\\n");
-        for (int i = 0; i < Math.min(5, lines.length); i++) context.text(font, lines[i], 18, 21 + i * 12, 0xFFD5DDF2);
+        for (int i = 0; i < Math.min(5, lines.length); i++) { int lineY = 31 + i * 12; context.fill(14, lineY + 10, w - 14, lineY + 11, 0x557B6547); context.text(font, trimToWidth(lines[i], w - 30), 15, lineY, 0xFF3D3023); }
         context.pose().popMatrix();
         renderHandle(context, config.noteBoardX + Math.round(w * config.noteBoardScale), config.noteBoardY + Math.round(h * config.noteBoardScale));
     }
 
     private int noteBoardWidth(HudFabricConfig config) {
         int width = 180;
-        if (config.noteBoardText != null) for (String line : config.noteBoardText.split("\\n")) width = Math.max(width, Math.min(320, font.width(line) + 24));
+        if (config.noteBoardText != null) for (String line : config.noteBoardText.split("\\n")) width = Math.max(width, Math.min(320, font.width(line) + 30));
         return width;
     }
 
     private int noteBoardHeight(HudFabricConfig config) {
         int count = config.noteBoardText == null || config.noteBoardText.isBlank() ? 1 : config.noteBoardText.split("\\n", -1).length;
-        return Math.max(38, 26 + Math.min(5, count) * 12);
+        return Math.max(56, 44 + Math.min(5, count) * 12);
     }
 
     private void renderScoreboardPreview(GuiGraphicsExtractor context, HudFabricConfig config) {

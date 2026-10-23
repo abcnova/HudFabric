@@ -515,9 +515,12 @@ public final class HudFabricConfigScreen extends Screen {
         }
         if (config.noteBoardEnabled) {
             context.getMatrices().push(); context.getMatrices().translate(config.noteBoardX, config.noteBoardY, 0); context.getMatrices().scale(config.noteBoardScale, config.noteBoardScale, 1);
-            context.fill(0, 0, 210, 72, 0xD90A1020); context.fill(0, 0, 2, 72, BLUE); context.drawTextWithShadow(textRenderer, tr("note.title"), 9, 6, WHITE);
+            context.fill(2, 3, 210, 84, 0x66000000); context.fill(0, 0, 208, 81, 0xFF50321E); context.fill(2, 2, 206, 79, 0xFF9A6336);
+            context.fill(4, 4, 204, 77, 0xFF684326); context.fill(7, 7, 201, 74, 0xFF98744A); context.fill(10, 10, 198, 71, 0xFFE8D8B5);
+            context.fill(12, 12, 196, 21, 0xFFF4E9CF); context.fill(103, 8, 108, 13, 0xFF8B2520); context.fill(104, 8, 107, 11, 0xFFE35B43);
+            context.drawTextWithShadow(textRenderer, tr("note.title"), 15, 14, 0xFF49351F);
             List<String> previewLines = config.noteBoardText.isBlank() ? List.of(tr("note.empty").getString()) : config.noteBoardText.lines().limit(3).toList();
-            int noteY = 25; for (String line : previewLines) { context.drawTextWithShadow(textRenderer, trimToWidth(line, 188), 9, noteY, WHITE); noteY += 12; }
+            int noteY = 31; for (String line : previewLines) { context.drawTextWithShadow(textRenderer, trimToWidth(line, 180), 15, noteY, 0xFF49351F); context.fill(14, noteY + 10, 196, noteY + 11, 0x667D6546); noteY += 12; }
             context.getMatrices().pop(); renderHandle(context, config.noteBoardX + Math.round(210 * config.noteBoardScale), config.noteBoardY + Math.round(84 * config.noteBoardScale));
         }
     }

@@ -131,16 +131,15 @@ public final class HudFabricClient implements ClientModInitializer {
                 Button editorButton = Button.builder(Component.translatable("hudfabric.button.hud_editor"), button -> openConfigScreen(screen)).bounds(buttonX, buttonY, buttonWidth, 20).build();
                 Button editButton = Button.builder(Component.literal("✎"), button -> { repositionHudEditor = !repositionHudEditor; button.setMessage(Component.literal(repositionHudEditor ? "✓" : "✎")); editorButton.active = !repositionHudEditor; }).bounds(buttonX + buttonWidth + 2, buttonY, 20, 20).build();
                 Screens.getWidgets(screen).add(editorButton); Screens.getWidgets(screen).add(editButton);
-                ScreenMouseEvents.allowMouseClick(screen).register((current, event) -> {
+                ScreenMouseEvents.beforeMouseClick(screen).register((current, event) -> {
                     if (current == screen && (repositionHudEditor || moveHudEditorKey.isDown()) && event.buttonInfo().button() == 0
                             && event.x() >= editorButton.getX() && event.x() < editorButton.getX() + editorButton.getWidth()
                             && event.y() >= editorButton.getY() && event.y() < editorButton.getY() + editorButton.getHeight()) {
                         draggingHudEditor = true;
                         dragOffsetX = (int) event.x() - editorButton.getX();
                         dragOffsetY = (int) event.y() - editorButton.getY();
-                        return false;
+                        editorButton.active = false;
                     }
-                    return true;
                 });
                 ScreenMouseEvents.allowMouseDrag(screen).register((current, event, horizontal, vertical) -> {
                     if (current != screen || !draggingHudEditor) return true;
@@ -151,9 +150,12 @@ public final class HudFabricClient implements ClientModInitializer {
                     config.hudEditorButtonX = nextX; config.hudEditorButtonY = nextY;
                     return false;
                 });
-                ScreenMouseEvents.allowMouseRelease(screen).register((current, event) -> {
-                    if (current == screen && draggingHudEditor) { draggingHudEditor = false; config.save(); return false; }
-                    return true;
+                ScreenMouseEvents.beforeMouseRelease(screen).register((current, event) -> {
+                    if (current == screen && draggingHudEditor) {
+                        draggingHudEditor = false;
+                        config.save();
+                        client.execute(() -> { if (!repositionHudEditor) editorButton.active = true; });
+                    }
                 });
             }
 

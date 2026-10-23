@@ -142,7 +142,7 @@ public final class HudFabricClient implements ClientModInitializer {
                 Screens.getWidgets(screen).add(editorButton);
                 Screens.getWidgets(screen).add(editButton);
 
-                ScreenMouseEvents.allowMouseClick(screen).register((current, event) -> {
+                ScreenMouseEvents.beforeMouseClick(screen).register((current, event) -> {
                     boolean editHeld = repositionHudEditor || moveHudEditorKey.isDown();
                     if (current == screen && editHeld && event.buttonInfo().button() == 0
                             && event.x() >= editorButton.getX() && event.x() < editorButton.getX() + editorButton.getWidth()
@@ -150,9 +150,8 @@ public final class HudFabricClient implements ClientModInitializer {
                         draggingHudEditor = true;
                         dragOffsetX = (int) event.x() - editorButton.getX();
                         dragOffsetY = (int) event.y() - editorButton.getY();
-                        return false;
+                        editorButton.active = false;
                     }
-                    return true;
                 });
                 ScreenMouseEvents.allowMouseDrag(screen).register((current, event, horizontal, vertical) -> {
                     if (current != screen || !draggingHudEditor) return true;
@@ -164,14 +163,12 @@ public final class HudFabricClient implements ClientModInitializer {
                     config.hudEditorButtonY = nextY;
                     return false;
                 });
-                ScreenMouseEvents.allowMouseRelease(screen).register((current, event) -> {
+                ScreenMouseEvents.beforeMouseRelease(screen).register((current, event) -> {
                     if (current == screen && draggingHudEditor) {
                         draggingHudEditor = false;
                         config.save();
-                        editorButton.active = true;
-                        return false;
+                        client.execute(() -> { if (!repositionHudEditor) editorButton.active = true; });
                     }
-                    return true;
                 });
             }
             if (screen instanceof DisconnectedScreen && lastServer != null) {

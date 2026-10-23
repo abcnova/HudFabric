@@ -122,20 +122,34 @@ public final class HudFabricRenderer {
         String note = config.noteBoardText == null ? "" : config.noteBoardText;
         String[] lines = note.split("\\n", -1);
         int width = 180;
-        for (String line : lines) width = Math.max(width, Math.min(320, font.width(line) + 24));
-        int height = Math.max(38, 26 + Math.min(5, lines.length) * 12);
+        for (String line : lines) width = Math.max(width, Math.min(320, font.width(line) + 30));
+        int height = Math.max(56, 44 + Math.min(5, lines.length) * 12);
         context.pose().pushMatrix();
         context.pose().translate(config.noteBoardX, config.noteBoardY);
         context.pose().scale(config.noteBoardScale, config.noteBoardScale);
-        fillSoftRect(context, 0, 0, width, height, 7, 0xE00A1020);
-        context.fill(9, 8, 11, height - 8, 0xFF7286FF);
+        context.fill(3, 4, width, height, 0x88000000);
+        context.fill(0, 0, width - 2, height - 2, 0xFF382317);
+        context.fill(2, 2, width - 4, height - 4, 0xFF9A6036);
+        context.fill(4, 4, width - 6, height - 6, 0xFF52321E);
+        for (int y = 6; y < height - 7; y += 9) context.fill(4, y, width - 6, y + 1, (y / 9 % 2 == 0) ? 0x557F4D2D : 0x55613720);
+        context.fill(7, 7, width - 9, height - 9, 0xFF986A43);
+        for (int y = 10; y < height - 11; y += 8) {
+            int offset = (y / 8 % 2) * 5;
+            for (int x = 11 + offset; x < width - 12; x += 13) context.fill(x, y, x + 1, y + 1, 0x55754B30);
+        }
+        context.fill(10, 10, width - 12, height - 12, 0xFFFFE9B7);
+        context.fill(11, 11, width - 13, height - 13, 0xFFFFF3D4);
+        context.fill(width / 2 - 2, 7, width / 2 + 2, 11, 0xFF7D211B);
+        context.fill(width / 2 - 1, 7, width / 2 + 1, 9, 0xFFE35D44);
         String title = Component.translatable("hudfabric.module.note_board").getString();
-        context.text(font, title, 18, 7, 0xFFEAF0FF);
+        context.text(font, title, 15, 14, 0xFF56351F);
         if (note.isBlank()) {
-            context.text(font, Component.translatable("hudfabric.note.empty").getString(), 18, 21, 0xFF9DA8C3);
+            context.text(font, Component.translatable("hudfabric.note.empty").getString(), 15, 31, 0xFF806C55);
         } else {
             for (int i = 0; i < Math.min(5, lines.length); i++) {
-                context.text(font, lines[i], 18, 21 + i * 12, 0xFFD5DDF2);
+                int lineY = 31 + i * 12;
+                context.fill(14, lineY + 10, width - 14, lineY + 11, 0x557B6547);
+                context.text(font, trimToWidth(font, lines[i], width - 30), 15, lineY, 0xFF3D3023);
             }
         }
         context.pose().popMatrix();

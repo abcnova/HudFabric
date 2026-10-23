@@ -2,6 +2,9 @@
 
 ## 1.0.8
 
+- Reworked 26.x mouse-drag handling after reports that HUD modules and the pause-menu HUD Editor button remained immovable on Minecraft 26.3; live-client confirmation is still pending.
+- Redesigned the personal note board for every supported version with a blocky wood frame, cork-like backing, pinned paper, ruled lines, and a matching editor.
+- Expanded the note editor for clearer writing and easier line-by-line editing.
 - Added privacy-safe settings export/import codes that can be copied into Discord; server-specific profiles are not included or overwritten.
 - Added a pencil control and configurable Right Alt drag mode for repositioning the HUD Editor button in the pause menu.
 - Added the sharing screen and movable pause-menu button to all 17 supported Minecraft source targets.
@@ -19,7 +22,7 @@
 
 ## 1.0.7
 
-- Fixed module dragging on Minecraft 26.3 and verified it with a client game test.
+- Added an initial module-drag fix for Minecraft 26.3. Later reports showed drag input still failed in some 26.3 client interactions; the 1.0.8 follow-up reworks that input path.
 - Restored the familiar settings layout and improved narrow-window handling.
 - Added per-module, crosshair, extra-settings, and full configuration resets.
 - Kept HUD elements inside the visible canvas when window dimensions change.

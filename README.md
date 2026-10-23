@@ -30,12 +30,14 @@ counter, and a movable in-game note board.
 - Low-durability warning threshold
 - Optional armor-break warning (disabled by default)
 - Totem and active-arrow counter
-- Editable, movable in-game note board
+- Editable, movable in-game note board with a Minecraft-style wood frame, cork backing, pinned paper and ruled writing lines (personal/client-side)
 - Server-specific profiles and settings migration
 - Auto-respawn and auto-reconnect helpers
 - Copyable, privacy-safe settings codes for sharing in Discord; imports preserve local server profiles
 - Repositionable pause-menu HUD Editor button with a pencil control and configurable Right Alt keybind
 - Independent armor hotbar slots use Minecraft's vanilla hotbar sprite, including resource-pack overrides
+- Reworked 26.x editor drag input after reports that HUD modules and the pause-menu editor button could not be moved reliably on 26.3
+- Replaced the generic note panel with a Minecraft-inspired pinned noticeboard design across the supported versions
 
 ## Supported Minecraft versions
 
@@ -68,6 +70,9 @@ Gradle `build` task inside the matching version directory.
 
 The public project uses only the creator identity **ABC_Nova**. No private
 profile information is required by the mod.
+
+The note board is personal and saved in the local client configuration; it is
+not synchronized to other players or the server.
 
 ## License
 
