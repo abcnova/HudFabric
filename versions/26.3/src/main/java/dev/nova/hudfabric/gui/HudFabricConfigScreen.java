@@ -16,6 +16,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -316,17 +317,17 @@ public final class HudFabricConfigScreen extends Screen {
     @Override
     public boolean mouseClicked(MouseButtonEvent click, boolean doubleClick) {
         if (settingsOpen) {
-            if (click.button() == 0 && handleScrollbarClick(click.x(), click.y())) {
+            if (click.button() == InputConstants.MOUSE_BUTTON_LEFT && handleScrollbarClick(click.x(), click.y())) {
                 return true;
             }
-            if (((page == SettingsPage.SCOREBOARD && activeModule != null) || page == SettingsPage.CROSSHAIR || page == SettingsPage.COLORS) && click.button() == 0 && handleColorPick(click.x(), click.y())) {
+            if (((page == SettingsPage.SCOREBOARD && activeModule != null) || page == SettingsPage.CROSSHAIR || page == SettingsPage.COLORS) && click.button() == InputConstants.MOUSE_BUTTON_LEFT && handleColorPick(click.x(), click.y())) {
                 return true;
             }
             return super.mouseClicked(click, doubleClick);
         }
 
         HudFabricConfig config = HudFabricClient.config;
-        if (click.button() == 0) {
+        if (click.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             if (config.scoreboardMode == HudFabricConfig.SCOREBOARD_CUSTOM && hasServerScoreboard() && inside(click.x(), click.y(), config.scoreboardX, config.scoreboardY, scoreboardWidth(config), scoreboardHeight(config))) {
                 if (inside(click.x(), click.y(), config.scoreboardX + scoreboardWidth(config) - 10, config.scoreboardY + scoreboardHeight(config) - 10, 10, 10)) {
                     dragTarget = DragTarget.SCOREBOARD_RESIZE;
@@ -510,7 +511,7 @@ public final class HudFabricConfigScreen extends Screen {
     @Override
     public void mouseMoved(double mouseX, double mouseY) {
         if (!settingsOpen && dragTarget != DragTarget.NONE) {
-            mouseDragged(new MouseButtonEvent(mouseX, mouseY, new MouseButtonInfo(0, 0)), 0, 0);
+            mouseDragged(new MouseButtonEvent(mouseX, mouseY, new MouseButtonInfo(InputConstants.MOUSE_BUTTON_LEFT, 0)), 0, 0);
         }
         super.mouseMoved(mouseX, mouseY);
     }

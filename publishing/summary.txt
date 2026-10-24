@@ -1,1 +1,1 @@
-HudFabric 1.0.8: client-side Fabric HUD editor for Minecraft 1.21–26.3 with privacy-safe sharing, a redesigned Minecraft-style personal note board, movable HUD modules, and resource-pack-aware hotbar slots. Updated 26.x drag handling; 26.3 live verification is pending.
+HudFabric 1.0.8: client-side Fabric HUD editor for Minecraft 1.21–26.3. Fixes HUD module dragging on 26.3 after Minecraft's SDL3 mouse-button change. Includes nine grouped compatibility JARs. Fabric API required; Java 25 for 26.x.

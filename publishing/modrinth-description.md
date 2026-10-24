@@ -25,7 +25,7 @@ and style useful HUD modules directly in-game—no server installation required.
 - Use the vanilla hotbar slot sprite for independent armor widgets, including resource-pack slot textures
 - Keep module reset controls and the familiar compact editor layout
 - Use the redesigned personal note board with a Minecraft-style wood frame, cork backing, pinned paper, and ruled writing lines
-- Drag HUD modules and reposition the pause-menu HUD Editor button with the updated 26.x mouse-input handling (26.3 live confirmation is pending)
+- Drag HUD modules on Minecraft 26.3 with SDL3-correct left mouse-button handling; the 26.3 client regression test verifies module movement
 
 ## Compatibility
 

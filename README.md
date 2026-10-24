@@ -36,10 +36,12 @@ counter, and a movable in-game note board.
 - Copyable, privacy-safe settings codes for sharing in Discord; imports preserve local server profiles
 - Repositionable pause-menu HUD Editor button with a pencil control and configurable Right Alt keybind
 - Independent armor hotbar slots use Minecraft's vanilla hotbar sprite, including resource-pack overrides
-- Reworked 26.x editor drag input after reports that HUD modules and the pause-menu editor button could not be moved reliably on 26.3
+- Fixed Minecraft 26.3 HUD dragging by matching SDL3's left mouse-button value; the automated client test verifies the updated module coordinates
 - Replaced the generic note panel with a Minecraft-inspired pinned noticeboard design across the supported versions
 
 ## Supported Minecraft versions
+
+All nine artifacts are published as version 1.0.8.
 
 | Minecraft versions | Release artifact |
 | --- | --- |

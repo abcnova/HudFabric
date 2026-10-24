@@ -144,7 +144,7 @@ public final class HudFabricClient implements ClientModInitializer {
 
                 ScreenMouseEvents.beforeMouseClick(screen).register((current, event) -> {
                     boolean editHeld = repositionHudEditor || moveHudEditorKey.isDown();
-                    if (current == screen && editHeld && event.buttonInfo().button() == 0
+                    if (current == screen && editHeld && event.buttonInfo().button() == InputConstants.MOUSE_BUTTON_LEFT
                             && event.x() >= editorButton.getX() && event.x() < editorButton.getX() + editorButton.getWidth()
                             && event.y() >= editorButton.getY() && event.y() < editorButton.getY() + editorButton.getHeight()) {
                         draggingHudEditor = true;

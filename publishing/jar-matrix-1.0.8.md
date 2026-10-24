@@ -14,8 +14,8 @@ Nine compatibility JARs cover the requested Minecraft versions from 1.21 through
 | 8 | `HudFabric-1.0.8-8-26.2.jar` | 26.2 | `versions/26.2` |
 | 9 | `HudFabric-1.0.8-9-26.3.jar` | 26.3 | `versions/26.3` |
 
-All 17 individual target projects passed Gradle `build` on 2026-10-23. Each range JAR is packaged from the oldest version in its group; the Minecraft dependency range is embedded in `fabric.mod.json`. Builds confirm source compilation for every listed target, but do not replace an in-game runtime test on each version.
+All nine grouped release source projects passed Gradle `build` on 2026-10-25. Each range JAR is packaged from the oldest version in its group; the Minecraft dependency range is embedded in `fabric.mod.json`.
 
-The 26.3 client game test reached client startup after the key-category fix. Retrying it after the updated mouse-drag changes again ended with Windows status `0xC0000005` before reporting test results. Module dragging therefore remains unverified in a live 26.3 client; this limitation is disclosed in the release notes.
+The Minecraft 26.3 client GameTest passed with SDL3's left-button value and verified the stats module moved from `(20, 60)` to `(65, 90)` with the updated position saved. The automated client test is not a substitute for manual interaction testing on every Minecraft release.
 
 Final artifacts are stored in `artifacts/1.0.8/`. Do not include `*-sources.jar` or `*-dev.jar` in the release assets.

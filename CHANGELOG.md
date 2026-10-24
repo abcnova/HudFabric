@@ -2,7 +2,10 @@
 
 ## 1.0.8
 
-- Reworked 26.x mouse-drag handling after reports that HUD modules and the pause-menu HUD Editor button remained immovable on Minecraft 26.3; live-client confirmation is still pending.
+- Fixed HUD module dragging on Minecraft 26.3 by using SDL3's left-button constant instead of the old GLFW value.
+- Updated the 26.3 drag regression test to use Minecraft's native left-button constant and confirm the moved module position is saved.
+- Refreshed all nine grouped compatibility JARs with the corrected 1.0.8 build.
+- Reworked 26.x mouse-drag handling after reports that the pause-menu HUD Editor button remained immovable on Minecraft 26.3.
 - Redesigned the personal note board for every supported version with a blocky wood frame, cork-like backing, pinned paper, ruled lines, and a matching editor.
 - Expanded the note editor for clearer writing and easier line-by-line editing.
 - Added privacy-safe settings export/import codes that can be copied into Discord; server-specific profiles are not included or overwritten.
