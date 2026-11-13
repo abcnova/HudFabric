@@ -197,7 +197,7 @@ public final class HudFabricRenderer {
             }
             int color = 0xFF000000 | (effect.getEffect().value().getColor() & 0x00FFFFFF);
             String texturePath = effect.getEffect().unwrapKey()
-                    .map(key -> "textures/mob_effect/" + resourcePath(key.toString()) + ".png")
+                    .map(key -> EffectTexturePath.fromPath(resourcePath(key.toString())))
                     .orElse("");
             lines.add(new EffectLine(name, formatDuration(effect.getDuration()), color, texturePath));
         }

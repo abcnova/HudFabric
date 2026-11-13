@@ -1,1 +1,1 @@
-HudFabric 1.0.8: client-side Fabric HUD editor for Minecraft 1.21–26.3. Fixes HUD module dragging on 26.3 after Minecraft's SDL3 mouse-button change. Includes nine grouped compatibility JARs. Fabric API required; Java 25 for 26.x.
+HudFabric 1.0.9: client-side Fabric HUD editor for Minecraft 1.21–26.3. Fixes effects HUD crashes from invalid modded status-effect icon paths while keeping effect names and durations visible. Nine grouped builds. Fabric API required; Java 25 for 26.x. MIT License.

@@ -4,7 +4,7 @@ HudFabric is a clean, client-side HUD editor for Minecraft Fabric. Move, scale,
 and style useful HUD modules directly in-game—no server installation required.
 
 [Source code](https://github.com/abcnova/HudFabric) ·
-[Releases](https://github.com/abcnova/HudFabric/releases) ·
+[HudFabric 1.0.9 release](https://github.com/abcnova/HudFabric/releases/tag/v1.0.9) ·
 [Report an issue](https://github.com/abcnova/HudFabric/issues)
 
 ## Modules
@@ -17,6 +17,10 @@ and style useful HUD modules directly in-game—no server installation required.
 - Left/right CPS counter
 - Jump Reset Indicator for PvP timing practice
 - Configurable crosshair, Crosshair Indicator, and block outline
+
+## Highlights in 1.0.9
+
+- Prevent effects HUD crashes when a modded status-effect registry path contains characters Minecraft rejects; the invalid icon is skipped while its name and duration remain visible.
 
 ## Highlights in 1.0.8
 

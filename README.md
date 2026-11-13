@@ -11,7 +11,8 @@ counter, and a movable in-game note board.
 
 [Download on Modrinth](https://modrinth.com/mod/hudfabric) ·
 [Download on CurseForge](https://www.curseforge.com/minecraft/mc-mods/hudfabric) ·
-[Releases](https://github.com/abcnova/HudFabric/releases) ·
+[HudFabric 1.0.9 release](https://github.com/abcnova/HudFabric/releases/tag/v1.0.9) ·
+[Source code](https://github.com/abcnova/HudFabric) ·
 [Report an issue](https://github.com/abcnova/HudFabric/issues)
 
 ## Highlights
@@ -38,28 +39,29 @@ counter, and a movable in-game note board.
 - Independent armor hotbar slots use Minecraft's vanilla hotbar sprite, including resource-pack overrides
 - Fixed Minecraft 26.3 HUD dragging by matching SDL3's left mouse-button value; the automated client test verifies the updated module coordinates
 - Replaced the generic note panel with a Minecraft-inspired pinned noticeboard design across the supported versions
+- Fixed effects HUD crashes when a modded status-effect icon path contains characters Minecraft rejects; the icon is skipped while the effect name and duration remain visible
 
 ## Supported Minecraft versions
 
-All nine artifacts are published as version 1.0.8.
+All nine artifacts are published as version 1.0.9.
 
 | Minecraft versions | Release artifact |
 | --- | --- |
-| 1.21–1.21.1 | `HudFabric-1.0.8-1.21-1.21.1.jar` |
-| 1.21.2–1.21.5 | `HudFabric-1.0.8-2-1.21.2-1.21.5.jar` |
-| 1.21.6–1.21.7 | `HudFabric-1.0.8-3-1.21.6-1.21.7.jar` |
-| 1.21.8 | `HudFabric-1.0.8-4-1.21.8.jar` |
-| 1.21.9–1.21.10 | `HudFabric-1.0.8-5-1.21.9-1.21.10.jar` |
-| 1.21.11 | `HudFabric-1.0.8-6-1.21.11.jar` |
-| 26.1–26.1.2 | `HudFabric-1.0.8-7-26.1-26.1.2.jar` |
-| 26.2 | `HudFabric-1.0.8-8-26.2.jar` |
-| 26.3 | `HudFabric-1.0.8-9-26.3.jar` |
+| 1.21–1.21.1 | `HudFabric-1.0.9-1.21-1.21.1.jar` |
+| 1.21.2–1.21.5 | `HudFabric-1.0.9-2-1.21.2-1.21.5.jar` |
+| 1.21.6–1.21.7 | `HudFabric-1.0.9-3-1.21.6-1.21.7.jar` |
+| 1.21.8 | `HudFabric-1.0.9-4-1.21.8.jar` |
+| 1.21.9–1.21.10 | `HudFabric-1.0.9-5-1.21.9-1.21.10.jar` |
+| 1.21.11 | `HudFabric-1.0.9-6-1.21.11.jar` |
+| 26.1–26.1.2 | `HudFabric-1.0.9-7-26.1-26.1.2.jar` |
+| 26.2 | `HudFabric-1.0.9-8-26.2.jar` |
+| 26.3 | `HudFabric-1.0.9-9-26.3.jar` |
 
 ## Source layout
 
 - `versions/` – version-specific source projects for every supported game version
-- `artifacts/1.0.8` – grouped release JARs
-- `publishing/jar-matrix-1.0.8.md` – compatibility and verification notes
+- `artifacts/1.0.9` – current grouped release JARs
+- `publishing/jar-matrix-1.0.9.md` – current compatibility and verification notes
 - `history` – privacy-safe archives, resources, and reconstructed Java source
   for 1.0.0 through 1.0.3
 
